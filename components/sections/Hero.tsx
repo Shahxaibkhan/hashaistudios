@@ -1,0 +1,90 @@
+import Link from "next/link";
+
+const heroStats = [
+  { label: "Studios shipped", value: "06", meta: "Healthcare, Sports, Food" },
+  { label: "Automation coverage", value: "72%", meta: "Average workflow lift" },
+  { label: "Time to first pilot", value: "30d", meta: "From intake to deployment" }
+];
+
+const signalTags = ["Healthcare systems", "Sports complexes", "Hospitality groups", "Proptech", "Financial ops"];
+
+export function Hero() {
+  return (
+    <section className="relative grid gap-10 overflow-hidden rounded-[40px] border border-line bg-base-muted/70 px-8 py-16 shadow-card md:grid-cols-[1.1fr_0.9fr] lg:px-12 lg:py-20">
+      <div className="pointer-events-none absolute inset-0 bg-radial-grid opacity-60" />
+        <div className="relative flex flex-col gap-8">
+        <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.6em] text-text-muted">
+          <span className="h-px w-10 bg-neon/60" />
+          AI Agency + Product Studio
+        </div>
+        <h1 className="text-balance text-5xl font-semibold leading-tight text-text-primary md:text-[3.75rem]">
+          HashAI Studios build vertical AI that feels bespoke, performs like infrastructure.
+        </h1>
+        <p className="max-w-2xl text-lg text-text-muted">
+          HashAI Studios embeds autonomous AI systems across clinics, arenas, restaurants, and real estate portfolios.
+          Every studio ships domain-trained copilots, observability, and premium product craft.
+        </p>
+        <div className="flex flex-wrap gap-4">
+          <Link
+            href="/studios"
+            className="rounded-full bg-neon px-7 py-3 text-xs font-semibold uppercase tracking-[0.35em] text-base transition hover:bg-white"
+          >
+            Explore Studios
+          </Link>
+          <Link
+            href="/contact"
+            className="rounded-full border border-line px-7 py-3 text-xs font-semibold uppercase tracking-[0.35em] text-text-primary transition hover:border-neon hover:text-neon"
+          >
+            Contact Team
+          </Link>
+        </div>
+        <div className="flex flex-wrap gap-3 text-[0.7rem] uppercase tracking-[0.4em] text-text-muted">
+          {signalTags.map((tag) => (
+            <span key={tag} className="rounded-full border border-line px-4 py-1">
+              {tag}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="relative rounded-[30px] border border-line/80 bg-surface/80 p-6">
+        <div className="absolute inset-0 rounded-[30px] bg-[radial-gradient(circle_at_top,_rgba(125,249,255,0.25),_transparent_65%)] opacity-70" />
+        <div className="relative flex flex-col gap-6">
+          <div className="w-full rounded-[20px] border border-line bg-base/90 px-8 py-5 text-center">
+            <p className="text-4xl font-semibold tracking-[0.35em] text-text-primary">
+              HASH<span className="text-neon">AI</span>
+            </p>
+            <p className="text-xs uppercase tracking-[0.6em] text-text-muted">Studios</p>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-base/60 p-6">
+                <p className="text-xs uppercase tracking-[0.5em] text-neon">Studio Network</p>
+                <p className="mt-4 text-2xl font-semibold text-text-primary">
+                  Dedicated pods, shared intelligence, measurable business lift.
+                </p>
+                <p className="mt-3 text-sm text-text-muted">
+                  Strategy, design, and engineering form a single operating layer across every deployment.
+                </p>
+              </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            {heroStats.map((stat) => (
+              <div key={stat.label} className="rounded-2xl border border-white/5 bg-base/40 p-4">
+                <p className="text-xs uppercase tracking-[0.4em] text-text-muted">{stat.label}</p>
+                <p className="mt-3 text-3xl font-semibold text-neon">{stat.value}</p>
+                <p className="text-xs text-text-muted">{stat.meta}</p>
+              </div>
+            ))}
+          </div>
+          <div className="glass-panel rounded-2xl p-5">
+            <p className="text-sm text-text-muted">Signal Feed</p>
+            <p className="mt-2 text-lg text-text-primary">Live orchestration across intake, ops, and customer experience.</p>
+            <div className="mt-4 flex flex-wrap gap-3 text-xs">
+              <span className="rounded-full bg-neon/20 px-3 py-1 text-neon">Observability</span>
+              <span className="rounded-full bg-white/10 px-3 py-1 text-text-primary">Human-in-the-loop</span>
+              <span className="rounded-full bg-white/10 px-3 py-1 text-text-primary">Governance</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

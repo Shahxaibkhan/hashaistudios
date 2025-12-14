@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  font-family: var(--font-space), var(--font-sora), ui-sans-serif, system-ui;
+  background-color: #03040b;
+  background-image: radial-gradient(circle at 20% 20%, rgba(125, 249, 255, 0.08), transparent 55%),
+    radial-gradient(circle at 80% 0%, rgba(139, 139, 255, 0.08), transparent 45%),
+    linear-gradient(180deg, #03040b 0%, #050918 40%, #03040b 100%);
+  color: #f8fbff;
+  min-height: 100vh;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cpath fill='none' stroke='rgba(255,255,255,0.03)' stroke-width='1' d='M0 80h160M80 0v160'/%3E%3C/svg%3E");
+  opacity: 0.6;
+}
+
+::selection {
+  background-color: rgba(125, 249, 255, 0.35);
+  color: #03040b;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .glass-panel {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(3, 4, 11, 0.6));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 25px 70px rgba(2, 6, 23, 0.65);
+  }
+}
