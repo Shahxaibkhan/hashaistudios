@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import type { Route } from "next";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const links = [
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" }
-];
+] satisfies { href: Route; label: string }[];
 
 export function MainNav() {
   const pathname = usePathname();
