@@ -18,9 +18,15 @@ export function SiteFooter() {
         </div>
         <div className="flex flex-wrap gap-4 text-xs uppercase tracking-[0.4em] text-text-muted">
           {footerNav.map((nav) => (
-            <Link key={nav.label} href={nav.href} className="transition hover:text-neon" target="_blank">
+            <a
+              key={nav.label}
+              href={nav.href}
+              className="transition hover:text-neon"
+              target="_blank"
+              rel="noreferrer"
+            >
               {nav.label}
-            </Link>
+            </a>
           ))}
         </div>
       </div>
