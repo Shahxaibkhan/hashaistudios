@@ -10,30 +10,30 @@ const signalTags = ["Healthcare systems", "Sports complexes", "Hospitality group
 
 export function Hero() {
   return (
-    <section className="relative grid gap-10 overflow-hidden rounded-[40px] border border-line bg-base-muted/70 px-8 py-16 shadow-card md:grid-cols-[1.1fr_0.9fr] lg:px-12 lg:py-20">
+    <section className="relative grid gap-10 overflow-hidden rounded-[32px] border border-line bg-base-muted/70 px-5 py-12 shadow-card sm:px-8 sm:py-16 md:grid-cols-[1.1fr_0.9fr] lg:rounded-[40px] lg:px-12 lg:py-20">
       <div className="pointer-events-none absolute inset-0 bg-radial-grid opacity-60" />
-        <div className="relative flex flex-col gap-8">
-        <div className="flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.6em] text-text-muted">
+      <div className="relative flex flex-col gap-8">
+        <div className="flex flex-wrap items-center gap-3 text-[0.6rem] uppercase tracking-[0.45em] text-text-muted sm:text-[0.65rem] sm:tracking-[0.6em]">
           <span className="h-px w-10 bg-neon/60" />
           AI Agency + Product Studio
         </div>
-        <h1 className="text-balance text-5xl font-semibold leading-tight text-text-primary md:text-[3.75rem]">
+        <h1 className="text-balance text-4xl font-semibold leading-tight text-text-primary sm:text-5xl md:text-[3.75rem]">
           HashAI Studios build vertical AI that feels bespoke, performs like infrastructure.
         </h1>
-        <p className="max-w-2xl text-lg text-text-muted">
+        <p className="max-w-2xl text-base text-text-muted sm:text-lg">
           HashAI Studios embeds autonomous AI systems across clinics, arenas, restaurants, and real estate portfolios.
           Every studio ships domain-trained copilots, observability, and premium product craft.
         </p>
-        <div className="flex flex-wrap gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap">
           <Link
             href="/studios"
-            className="rounded-full bg-neon px-7 py-3 text-xs font-semibold uppercase tracking-[0.35em] text-base transition hover:bg-white"
+            className="w-full rounded-full bg-neon px-7 py-3 text-center text-xs font-semibold uppercase tracking-[0.35em] text-base transition hover:bg-white sm:w-auto"
           >
             Explore Studios
           </Link>
           <Link
             href="/contact"
-            className="rounded-full border border-line px-7 py-3 text-xs font-semibold uppercase tracking-[0.35em] text-text-primary transition hover:border-neon hover:text-neon"
+            className="w-full rounded-full border border-line px-7 py-3 text-center text-xs font-semibold uppercase tracking-[0.35em] text-text-primary transition hover:border-neon hover:text-neon sm:w-auto"
           >
             Contact Team
           </Link>
