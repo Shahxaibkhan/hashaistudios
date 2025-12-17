@@ -10,58 +10,58 @@ const signalTags = ["Healthcare systems", "Sports complexes", "Hospitality group
 
 export function Hero() {
   return (
-    <section className="relative grid gap-10 overflow-hidden rounded-[32px] border border-line bg-base-muted/70 px-5 py-12 shadow-card sm:px-8 sm:py-16 md:grid-cols-[1.1fr_0.9fr] lg:rounded-[40px] lg:px-12 lg:py-20">
+    <section className="relative flex w-full flex-col gap-8 overflow-hidden rounded-[24px] border border-line bg-base-muted/70 px-4 py-10 shadow-card sm:rounded-[32px] sm:px-8 sm:py-14 md:grid md:grid-cols-[1.1fr_0.9fr] md:gap-10 lg:rounded-[40px] lg:px-12 lg:py-20">
       <div className="pointer-events-none absolute inset-0 bg-radial-grid opacity-60" />
-      <div className="relative flex flex-col gap-8">
-        <div className="flex flex-wrap items-center gap-3 text-[0.6rem] uppercase tracking-[0.45em] text-text-muted sm:text-[0.65rem] sm:tracking-[0.6em]">
+      <div className="relative flex flex-col gap-5">
+        <div className="flex flex-wrap items-center gap-2 text-[0.55rem] uppercase tracking-[0.3em] text-text-muted sm:gap-3 sm:text-[0.65rem] sm:tracking-[0.5em]">
           <span className="h-px w-10 bg-neon/60" />
           AI Agency + Product Studio
         </div>
-        <h1 className="text-balance text-4xl font-semibold leading-tight text-text-primary sm:text-5xl md:text-[3.75rem]">
+        <h1 className="break-words text-pretty text-2xl font-semibold leading-[1.15] text-text-primary sm:text-[2.85rem] md:text-[3.5rem]">
           HashAI Studios build vertical AI that feels bespoke, performs like infrastructure.
         </h1>
-        <p className="max-w-2xl text-base text-text-muted sm:text-lg">
+        <p className="break-words text-pretty text-base leading-relaxed text-text-muted sm:text-lg">
           HashAI Studios embeds autonomous AI systems across clinics, arenas, restaurants, and real estate portfolios.
           Every studio ships domain-trained copilots, observability, and premium product craft.
         </p>
-        <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <Link
             href="/studios"
-            className="w-full rounded-full bg-neon px-7 py-3 text-center text-xs font-semibold uppercase tracking-[0.35em] text-base transition hover:bg-white sm:w-auto"
+            className="w-full rounded-full bg-neon px-6 py-3 text-center text-xs font-semibold uppercase tracking-[0.25em] text-base transition hover:bg-white sm:w-auto"
           >
             Explore Studios
           </Link>
           <Link
             href="/contact"
-            className="w-full rounded-full border border-line px-7 py-3 text-center text-xs font-semibold uppercase tracking-[0.35em] text-text-primary transition hover:border-neon hover:text-neon sm:w-auto"
+            className="w-full rounded-full border border-line px-6 py-3 text-center text-xs font-semibold uppercase tracking-[0.25em] text-text-primary transition hover:border-neon hover:text-neon sm:w-auto"
           >
             Contact Team
           </Link>
         </div>
-        <div className="flex flex-wrap gap-3 text-[0.7rem] uppercase tracking-[0.4em] text-text-muted">
+        <div className="flex flex-wrap gap-2 text-[0.6rem] uppercase tracking-[0.25em] text-text-muted sm:gap-3">
           {signalTags.map((tag) => (
-            <span key={tag} className="rounded-full border border-line px-4 py-1">
+            <span key={tag} className="rounded-full border border-line px-3 py-1">
               {tag}
             </span>
           ))}
         </div>
       </div>
 
-      <div className="relative rounded-[30px] border border-line/80 bg-surface/80 p-6">
+      <div className="relative w-full overflow-hidden rounded-[24px] border border-line/80 bg-surface/80 p-4 sm:rounded-[30px] sm:p-6">
         <div className="absolute inset-0 rounded-[30px] bg-[radial-gradient(circle_at_top,_rgba(125,249,255,0.25),_transparent_65%)] opacity-70" />
         <div className="relative flex flex-col gap-6">
-          <div className="w-full rounded-[20px] border border-line bg-base/90 px-8 py-5 text-center">
-            <p className="text-4xl font-semibold tracking-[0.35em] text-text-primary">
+          <div className="w-full rounded-[18px] border border-line bg-base/90 px-6 py-4 text-center sm:rounded-[20px] sm:px-8 sm:py-5">
+            <p className="text-2xl font-semibold tracking-[0.25em] text-text-primary sm:text-4xl sm:tracking-[0.35em]">
               HASH<span className="text-neon">AI</span>
             </p>
-            <p className="text-xs uppercase tracking-[0.6em] text-text-muted">Studios</p>
+            <p className="text-[0.55rem] uppercase tracking-[0.45em] text-text-muted sm:text-xs sm:tracking-[0.6em]">Studios</p>
           </div>
-          <div className="rounded-2xl border border-white/10 bg-base/60 p-6">
-                <p className="text-xs uppercase tracking-[0.5em] text-neon">Studio Network</p>
-                <p className="mt-4 text-2xl font-semibold text-text-primary">
+          <div className="rounded-2xl border border-white/10 bg-base/60 p-5 sm:p-6">
+                <p className="text-[0.6rem] uppercase tracking-[0.4em] text-neon sm:text-xs sm:tracking-[0.5em]">Studio Network</p>
+                <p className="mt-3 text-xl font-semibold leading-snug text-text-primary sm:mt-4 sm:text-2xl">
                   Dedicated pods, shared intelligence, measurable business lift.
                 </p>
-                <p className="mt-3 text-sm text-text-muted">
+                <p className="mt-3 text-sm leading-relaxed text-text-muted">
                   Strategy, design, and engineering form a single operating layer across every deployment.
                 </p>
               </div>
