@@ -6,12 +6,12 @@ type BrandLogoProps = {
 };
 
 const titleSizes = {
-  default: "text-[1.4rem]",
+  default: "text-[1.1rem] sm:text-[1.4rem]",
   hero: "text-[2.4rem] leading-none md:text-[3rem]"
 };
 
 const subtitleSizes = {
-  default: "text-[0.55rem]",
+  default: "text-[0.48rem] sm:text-[0.55rem]",
   hero: "text-xs md:text-sm"
 };
 
@@ -25,12 +25,17 @@ export function BrandLogo({ className, variant = "default" }: BrandLogoProps) {
       )}
       aria-label="HashAI Studios"
     >
-      <span className={cn("font-semibold tracking-[0.35em]", titleSizes[variant])}>
+      <span
+        className={cn(
+          "font-semibold tracking-[0.25em] sm:tracking-[0.35em]",
+          titleSizes[variant]
+        )}
+      >
         Hash<span className="text-neon">AI</span>
       </span>
       <span
         className={cn(
-          "mt-1 flex items-center gap-2 tracking-[0.8em] text-text-muted",
+          "mt-1 flex items-center gap-2 tracking-[0.6em] text-text-muted sm:tracking-[0.8em]",
           subtitleSizes[variant]
         )}
       >

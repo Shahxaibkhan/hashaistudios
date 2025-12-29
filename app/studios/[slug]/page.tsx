@@ -14,8 +14,9 @@ export function generateMetadata({ params }: { params: { slug: string } }) {
     };
   }
 
-  return {
-    title: `${studio.name} | HashAI Studios`,
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import QRCode from 'react-qr-code';
     description: studio.shortDescription
   };
 }
