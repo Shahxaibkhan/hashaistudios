@@ -1,6 +1,11 @@
+
 import { notFound } from "next/navigation";
 import { studios } from "@/data/studios";
 import { Badge } from "@/components/ui/Badge";
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import QRCode from 'react-qr-code';
+
 
 export function generateStaticParams() {
   return studios.map((studio) => ({ slug: studio.slug }));
@@ -13,10 +18,7 @@ export function generateMetadata({ params }: { params: { slug: string } }) {
       title: "Studio | HashAI Studios"
     };
   }
-
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import QRCode from 'react-qr-code';
+  return {
     description: studio.shortDescription
   };
 }
