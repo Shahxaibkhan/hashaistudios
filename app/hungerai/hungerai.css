@@ -1,0 +1,896 @@
+/**
+ * HungerAI Design System v3
+ * Clean light theme - Professional food ordering UI
+ * Inspired by UberEats, DoorDash, Foodpanda
+ */
+
+/* HungerAI CSS Variables - Light Theme */
+.hungerai {
+  /* Base - Clean white palette */
+  --hai-bg-primary: #ffffff;
+  --hai-bg-secondary: #f8f9fa;
+  --hai-bg-card: #ffffff;
+  --hai-bg-elevated: #f1f3f5;
+  --hai-bg-hover: #e9ecef;
+
+  /* Text - Dark for readability */
+  --hai-text-primary: #1a1a2e;
+  --hai-text-secondary: #495057;
+  --hai-text-muted: #868e96;
+  --hai-text-dim: #adb5bd;
+
+  /* Brand accent - Vibrant orange (food industry standard) */
+  --hai-accent-primary: #ff6b35;
+  --hai-accent-primary-hover: #e85a2b;
+  --hai-accent-primary-light: rgba(255, 107, 53, 0.1);
+  --hai-accent-green: #22c55e;
+  --hai-accent-green-light: rgba(34, 197, 94, 0.1);
+  --hai-accent-red: #ef4444;
+  --hai-accent-red-light: rgba(239, 68, 68, 0.1);
+  --hai-accent-amber: #f59e0b;
+  --hai-accent-wa: #25d366;
+
+  /* Gradients */
+  --hai-gradient-primary: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+  --hai-gradient-card: linear-gradient(145deg, #ffffff 0%, #fafafa 100%);
+
+  /* Border */
+  --hai-border: #e9ecef;
+  --hai-border-subtle: #f1f3f5;
+  --hai-border-focus: #ff6b35;
+
+  /* Shadows */
+  --hai-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --hai-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --hai-shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.12);
+  --hai-shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.15);
+
+  /* Transitions */
+  --hai-transition-fast: 120ms cubic-bezier(0.4, 0, 0.2, 1);
+  --hai-transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --hai-transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Radius */
+  --hai-radius-sm: 8px;
+  --hai-radius-md: 12px;
+  --hai-radius-lg: 16px;
+  --hai-radius-xl: 24px;
+  --hai-radius-full: 9999px;
+}
+
+/* Base styles for HungerAI pages */
+.hungerai {
+  background: var(--hai-bg-primary);
+  color: var(--hai-text-primary);
+  min-height: 100vh;
+  font-family: var(--font-dm-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography */
+.hungerai .font-display {
+  font-family: var(--font-syne), -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.hungerai h1,
+.hungerai h2,
+.hungerai h3 {
+  font-family: var(--font-syne), -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--hai-text-primary);
+}
+
+/* Card */
+.hungerai .hai-card {
+  background: var(--hai-bg-card);
+  border: 1px solid var(--hai-border);
+  border-radius: var(--hai-radius-lg);
+  box-shadow: var(--hai-shadow-sm);
+  transition: all var(--hai-transition);
+}
+
+.hungerai .hai-card:hover {
+  box-shadow: var(--hai-shadow-md);
+}
+
+/* Input */
+.hungerai .hai-input {
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--hai-bg-secondary);
+  border: 1px solid var(--hai-border);
+  border-radius: var(--hai-radius-md);
+  color: var(--hai-text-primary);
+  font-size: 15px;
+  transition: all var(--hai-transition);
+  outline: none;
+}
+
+.hungerai .hai-input.pl-12,
+.hungerai .hai-input[class*="pl-12"] {
+  padding-left: 3rem;
+}
+
+.hungerai .hai-input::placeholder {
+  color: var(--hai-text-dim);
+}
+
+.hungerai .hai-input:hover {
+  border-color: var(--hai-text-muted);
+}
+
+.hungerai .hai-input:focus {
+  border-color: var(--hai-accent-primary);
+  box-shadow: 0 0 0 3px var(--hai-accent-primary-light);
+  background: var(--hai-bg-primary);
+}
+
+/* Buttons */
+.hungerai .hai-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: var(--hai-radius-md);
+  border: none;
+  cursor: pointer;
+  transition: all var(--hai-transition);
+  outline: none;
+}
+
+.hungerai .hai-btn-primary {
+  background: var(--hai-gradient-primary);
+  color: white;
+  box-shadow: 0 4px 14px rgba(255, 107, 53, 0.3);
+}
+
+.hungerai .hai-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+}
+
+.hungerai .hai-btn-primary:active {
+  transform: translateY(0);
+}
+
+.hungerai .hai-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.hungerai .hai-btn-secondary {
+  background: var(--hai-bg-secondary);
+  color: var(--hai-text-primary);
+  border: 1px solid var(--hai-border);
+}
+
+.hungerai .hai-btn-secondary:hover {
+  background: var(--hai-bg-hover);
+  border-color: var(--hai-text-muted);
+}
+
+.hungerai .hai-btn-ghost {
+  background: transparent;
+  color: var(--hai-text-secondary);
+  padding: 10px 16px;
+}
+
+.hungerai .hai-btn-ghost:hover {
+  background: var(--hai-bg-secondary);
+  color: var(--hai-text-primary);
+}
+
+/* Status Badge */
+.hungerai .hai-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: var(--hai-radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.hungerai .hai-badge-green {
+  background: var(--hai-accent-green-light);
+  color: var(--hai-accent-green);
+}
+
+.hungerai .hai-badge-red {
+  background: var(--hai-accent-red-light);
+  color: var(--hai-accent-red);
+}
+
+.hungerai .hai-badge-amber {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--hai-accent-amber);
+}
+
+.hungerai .hai-badge-orange {
+  background: var(--hai-accent-primary-light);
+  color: var(--hai-accent-primary);
+}
+
+/* Stat Card */
+.hungerai .hai-stat-card {
+  background: var(--hai-bg-card);
+  border: 1px solid var(--hai-border);
+  border-radius: var(--hai-radius-lg);
+  padding: 20px;
+  box-shadow: var(--hai-shadow-sm);
+}
+
+.hungerai .hai-stat-card .stat-icon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--hai-accent-primary-light);
+  color: var(--hai-accent-primary);
+  border-radius: var(--hai-radius-md);
+  margin-bottom: 14px;
+}
+
+.hungerai .hai-stat-card .stat-label {
+  font-size: 13px;
+  color: var(--hai-text-muted);
+  margin-bottom: 4px;
+}
+
+.hungerai .hai-stat-card .stat-value {
+  font-family: var(--font-syne), sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--hai-text-primary);
+  letter-spacing: -0.02em;
+}
+
+/* Closed Banner */
+.hungerai .hai-closed-banner {
+  background: var(--hai-accent-red-light);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: var(--hai-accent-red);
+  padding: 12px 16px;
+  border-radius: var(--hai-radius-md);
+  font-weight: 500;
+  text-align: center;
+}
+
+/* Loading skeleton */
+.hungerai .hai-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--hai-bg-secondary) 0%,
+    var(--hai-bg-hover) 50%,
+    var(--hai-bg-secondary) 100%
+  );
+  background-size: 200% 100%;
+  animation: hai-shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--hai-radius-md);
+}
+
+@keyframes hai-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Navigation */
+.hungerai .hai-nav {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--hai-bg-secondary);
+  border-radius: var(--hai-radius-lg);
+}
+
+.hungerai .hai-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--hai-text-muted);
+  border-radius: var(--hai-radius-md);
+  transition: all var(--hai-transition);
+  text-decoration: none;
+}
+
+.hungerai .hai-nav-item:hover {
+  color: var(--hai-text-primary);
+  background: var(--hai-bg-hover);
+}
+
+.hungerai .hai-nav-item.active {
+  color: var(--hai-accent-primary);
+  background: var(--hai-bg-card);
+  box-shadow: var(--hai-shadow-sm);
+}
+
+/* Item Card (Menu) */
+.hungerai .hai-item-card {
+  background: var(--hai-bg-card);
+  border: 1px solid var(--hai-border);
+  border-radius: var(--hai-radius-lg);
+  padding: 16px;
+  display: flex;
+  gap: 14px;
+  transition: all var(--hai-transition);
+  cursor: pointer;
+}
+
+.hungerai .hai-item-card:hover {
+  border-color: var(--hai-text-muted);
+  box-shadow: var(--hai-shadow-md);
+}
+
+.hungerai .hai-item-card:active {
+  transform: scale(0.99);
+}
+
+/* Price tag */
+.hungerai .hai-price {
+  font-family: var(--font-syne), sans-serif;
+  font-weight: 700;
+  color: var(--hai-accent-primary);
+}
+
+/* Cart Button - Floating */
+.hungerai .hai-cart-btn {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 28px;
+  background: var(--hai-gradient-primary);
+  color: white;
+  font-weight: 600;
+  font-size: 15px;
+  border-radius: var(--hai-radius-full);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 8px 30px rgba(255, 107, 53, 0.4);
+  transition: all var(--hai-transition);
+  z-index: 50;
+}
+
+.hungerai .hai-cart-btn:hover {
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: 0 12px 40px rgba(255, 107, 53, 0.5);
+}
+
+/* Cart Float Link */
+.hungerai .hai-cart-float {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 24px;
+  min-width: 280px;
+  background: var(--hai-gradient-primary);
+  color: white;
+  font-weight: 600;
+  font-size: 15px;
+  text-decoration: none;
+  border-radius: var(--hai-radius-full);
+  box-shadow: 0 8px 30px rgba(255, 107, 53, 0.4);
+  transition: all var(--hai-transition);
+  z-index: 50;
+}
+
+.hungerai .hai-cart-float:hover {
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: 0 12px 40px rgba(255, 107, 53, 0.5);
+}
+
+/* Bottom Sheet */
+.hungerai .hai-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--hai-transition);
+  z-index: 100;
+}
+
+.hungerai .hai-sheet-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.hungerai .hai-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--hai-bg-primary);
+  border-radius: var(--hai-radius-xl) var(--hai-radius-xl) 0 0;
+  max-height: 90vh;
+  overflow-y: auto;
+  transform: translateY(100%);
+  transition: transform var(--hai-transition-slow);
+  z-index: 101;
+  box-shadow: var(--hai-shadow-xl);
+}
+
+.hungerai .hai-sheet.open {
+  transform: translateY(0);
+}
+
+.hungerai .hai-sheet-handle {
+  width: 40px;
+  height: 4px;
+  background: var(--hai-border);
+  border-radius: 2px;
+  margin: 12px auto;
+}
+
+/* Close Button for Sheet */
+.hungerai .hai-sheet-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--hai-bg-secondary);
+  border: none;
+  border-radius: var(--hai-radius-full);
+  color: var(--hai-text-secondary);
+  cursor: pointer;
+  transition: all var(--hai-transition);
+  z-index: 10;
+}
+
+.hungerai .hai-sheet-close:hover {
+  background: var(--hai-bg-hover);
+  color: var(--hai-text-primary);
+}
+
+/* Category Tab */
+.hungerai .hai-category-tabs {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 12px 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.hungerai .hai-category-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.hungerai .hai-category-tab {
+  flex-shrink: 0;
+  padding: 10px 18px;
+  background: transparent;
+  border: 1.5px solid var(--hai-border);
+  border-radius: var(--hai-radius-full);
+  color: var(--hai-text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--hai-transition);
+  white-space: nowrap;
+  min-height: 44px; /* iOS touch target */
+}
+
+.hungerai .hai-category-tab:hover {
+  border-color: var(--hai-accent-primary);
+  color: var(--hai-accent-primary);
+  background: var(--hai-accent-primary-light);
+}
+
+.hungerai .hai-category-tab.active {
+  background: var(--hai-accent-primary);
+  border-color: var(--hai-accent-primary);
+  color: white;
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+}
+
+/* Quantity Selector / Stepper */
+.hungerai .hai-stepper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--hai-bg-secondary);
+  border-radius: var(--hai-radius-md);
+  padding: 4px;
+}
+
+.hungerai .hai-stepper button {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--hai-bg-card);
+  border: 1px solid var(--hai-border);
+  border-radius: var(--hai-radius-sm);
+  color: var(--hai-text-primary);
+  font-size: 18px;
+  cursor: pointer;
+  transition: all var(--hai-transition);
+}
+
+.hungerai .hai-stepper button:hover:not(:disabled) {
+  background: var(--hai-bg-hover);
+  border-color: var(--hai-text-muted);
+}
+
+.hungerai .hai-stepper button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.hungerai .hai-stepper span {
+  width: 40px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+/* Checkbox */
+.hungerai .hai-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--hai-bg-secondary);
+  border: 1px solid var(--hai-border);
+  border-radius: var(--hai-radius-md);
+  cursor: pointer;
+  transition: all var(--hai-transition);
+}
+
+.hungerai .hai-checkbox:hover {
+  border-color: var(--hai-text-muted);
+}
+
+.hungerai .hai-checkbox.checked {
+  border-color: var(--hai-accent-primary);
+  background: var(--hai-accent-primary-light);
+}
+
+.hungerai .hai-checkbox-box {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--hai-bg-card);
+  border: 2px solid var(--hai-border);
+  border-radius: 6px;
+  transition: all var(--hai-transition);
+}
+
+.hungerai .hai-checkbox.checked .hai-checkbox-box {
+  background: var(--hai-accent-primary);
+  border-color: var(--hai-accent-primary);
+}
+
+/* Divider */
+.hungerai .hai-divider {
+  height: 1px;
+  background: var(--hai-border);
+  margin: 16px 0;
+}
+
+/* Size Selector Buttons */
+.hungerai .hai-size-btn {
+  flex: 1;
+  padding: 14px 12px;
+  background: var(--hai-bg-secondary);
+  border: 2px solid var(--hai-border);
+  border-radius: var(--hai-radius-md);
+  cursor: pointer;
+  transition: all var(--hai-transition);
+  text-align: center;
+}
+
+.hungerai .hai-size-btn:hover {
+  border-color: var(--hai-text-muted);
+}
+
+.hungerai .hai-size-btn.active {
+  border-color: var(--hai-accent-primary);
+  background: var(--hai-accent-primary-light);
+}
+
+.hungerai .hai-size-btn .size-label {
+  font-weight: 600;
+  color: var(--hai-text-primary);
+  font-size: 14px;
+}
+
+.hungerai .hai-size-btn .size-price {
+  font-size: 13px;
+  color: var(--hai-text-muted);
+  margin-top: 2px;
+}
+
+.hungerai .hai-size-btn.active .size-price {
+  color: var(--hai-accent-primary);
+}
+
+/* Quick Add Button */
+.hungerai .hai-quick-add {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--hai-accent-primary);
+  color: white;
+  border: none;
+  border-radius: var(--hai-radius-full);
+  font-size: 20px;
+  cursor: pointer;
+  transition: all var(--hai-transition);
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+}
+
+.hungerai .hai-quick-add:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+}
+
+/* Restaurant Header */
+.hungerai .hai-restaurant-header {
+  background: var(--hai-bg-card);
+  border-bottom: 1px solid var(--hai-border);
+  padding: 16px;
+}
+
+/* Cart Item */
+.hungerai .hai-cart-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--hai-border);
+}
+
+.hungerai .hai-cart-item:last-child {
+  border-bottom: none;
+}
+
+/* Map Container */
+.hungerai .hai-map-container {
+  width: 100%;
+  height: 200px;
+  border-radius: var(--hai-radius-lg);
+  border: 1px solid var(--hai-border);
+  overflow: hidden;
+  background: var(--hai-bg-secondary);
+}
+
+.hungerai .hai-map-container .leaflet-container {
+  height: 100%;
+  width: 100%;
+  border-radius: var(--hai-radius-lg);
+}
+
+/* Order Summary */
+.hungerai .hai-order-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+}
+
+.hungerai .hai-order-row.total {
+  border-top: 2px solid var(--hai-text-primary);
+  margin-top: 8px;
+  padding-top: 16px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* Form Label */
+.hungerai .hai-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--hai-text-secondary);
+  margin-bottom: 8px;
+}
+
+/* Toggle Switch */
+.hungerai .hai-toggle {
+  position: relative;
+  width: 52px;
+  height: 28px;
+  background: var(--hai-bg-secondary);
+  border-radius: var(--hai-radius-full);
+  border: 1px solid var(--hai-border);
+  cursor: pointer;
+  transition: all var(--hai-transition);
+}
+
+.hungerai .hai-toggle.active {
+  background: var(--hai-accent-primary);
+  border-color: var(--hai-accent-primary);
+}
+
+.hungerai .hai-toggle::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  transition: all var(--hai-transition);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+.hungerai .hai-toggle.active::after {
+  transform: translateX(24px);
+}
+
+/* Empty State */
+.hungerai .hai-empty {
+  text-align: center;
+  padding: 48px 24px;
+}
+
+.hungerai .hai-empty-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--hai-bg-secondary);
+  border-radius: var(--hai-radius-xl);
+  font-size: 36px;
+}
+
+/* WhatsApp Button */
+.hungerai .hai-wa-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px 32px;
+  background: #25d366;
+  color: white;
+  font-weight: 600;
+  font-size: 16px;
+  border: none;
+  border-radius: var(--hai-radius-full);
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(37, 211, 102, 0.3);
+  transition: all var(--hai-transition);
+}
+
+.hungerai .hai-wa-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+}
+
+/* Payment Method Card */
+.hungerai .hai-payment-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: var(--hai-bg-secondary);
+  border: 2px solid var(--hai-border);
+  border-radius: var(--hai-radius-lg);
+  cursor: pointer;
+  transition: all var(--hai-transition);
+}
+
+.hungerai .hai-payment-card:hover {
+  border-color: var(--hai-text-muted);
+}
+
+.hungerai .hai-payment-card.active {
+  border-color: var(--hai-accent-primary);
+  background: var(--hai-accent-primary-light);
+}
+
+.hungerai .hai-payment-card .payment-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--hai-bg-card);
+  border-radius: var(--hai-radius-md);
+  font-size: 24px;
+}
+
+/* ============================================
+   MOBILE-FIRST RESPONSIVE DESIGN
+   ============================================ */
+
+/* Touch-friendly tap targets (min 44px) */
+.hungerai button,
+.hungerai a,
+.hungerai input,
+.hungerai select {
+  min-height: 44px;
+}
+
+/* Prevent zoom on input focus (iOS) */
+.hungerai input,
+.hungerai select,
+.hungerai textarea {
+  font-size: 16px;
+}
+
+/* Safe area padding for notched devices */
+.hungerai {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Cart float button safe area */
+.hungerai .hai-cart-float,
+.hungerai .hai-cart-btn {
+  bottom: calc(24px + env(safe-area-inset-bottom));
+}
+
+/* Better touch feedback */
+.hungerai .hai-card:active {
+  transform: scale(0.98);
+}
+
+.hungerai .hai-category-tab:active {
+  transform: scale(0.95);
+}
+
+/* Tablet and Desktop */
+@media (min-width: 768px) {
+  .hungerai .hai-sheet {
+    max-width: 480px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100%);
+    border-radius: var(--hai-radius-xl);
+    margin-bottom: 24px;
+    max-height: 85vh;
+  }
+  
+  .hungerai .hai-sheet.open {
+    transform: translateX(-50%) translateY(0);
+  }
+  
+  /* Wider content on tablet */
+  .hungerai main {
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  
+  /* Less aggressive touch feedback */
+  .hungerai .hai-card:active {
+    transform: scale(0.99);
+  }
+}
