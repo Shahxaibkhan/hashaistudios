@@ -22,13 +22,13 @@ export default function AdminPage() {
       } = await supabase.auth.getSession();
 
       if (!session) {
-        router.push("/hungerai/dashboard/login");
+        router.push("/hungerai/login");
         return;
       }
 
       // Check if admin
       if (session.user.email !== ADMIN_EMAIL) {
-        router.push("/hungerai/dashboard");
+        router.push("/hungerai/login");
         return;
       }
 
