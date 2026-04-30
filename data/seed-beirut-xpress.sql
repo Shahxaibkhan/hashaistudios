@@ -5,12 +5,13 @@
 
 -- Restaurant
 INSERT INTO restaurants (
-  id, slug, name, whatsapp_number, city_lat, city_lng, 
+  id, slug, name, tagline, whatsapp_number, city_lat, city_lng, 
   delivery_radius_km, is_open, owner_email
 ) VALUES (
   'b2000000-0000-0000-0000-000000000001',
   'beirut-xpress',
   'Beirut Xpress',
+  'Authentic Lebanese Cuisine',
   '923434994409',
   31.5204,  -- Lahore coordinates
   74.3587,

@@ -15,6 +15,7 @@ create table restaurants (
   id uuid primary key default gen_random_uuid(),
   slug text unique not null,                    -- e.g. "burger-point"
   name text not null,
+  tagline text,                                 -- e.g. "Authentic Lebanese Cuisine"
   logo_url text,
   whatsapp_number text not null,                -- e.g. 923001234567 (no + or spaces)
   delivery_base_fee integer default 50,         -- Rs flat base fee
