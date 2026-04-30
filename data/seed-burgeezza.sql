@@ -8,7 +8,7 @@ insert into restaurants (slug, name, whatsapp_number, owner_email, online_paymen
 values (
   'burgeezza',
   'Burgeezza',
-  '923044327676',
+  '923434994409',
   'shahzzaib.khan@gmail.com',
   'Contact restaurant for payment details',
   31.5204,
