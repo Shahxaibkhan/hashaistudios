@@ -41,7 +41,7 @@ INSERT INTO categories (id, restaurant_id, name, sort_order) VALUES
 -- =============================================================================
 
 -- MEZZE
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('b2200000-0000-0000-0000-000000000001', 'b2000000-0000-0000-0000-000000000001', 'b2100000-0000-0000-0000-000000000001', 
    'Plain Hummus', 'Classic cold hummus made with chickpeas, tahini, lemon & olive oil', 370, true),
   ('b2200000-0000-0000-0000-000000000002', 'b2000000-0000-0000-0000-000000000001', 'b2100000-0000-0000-0000-000000000001', 
@@ -56,7 +56,7 @@ INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_
    'French Fries', 'Golden crispy fries', 350, true);
 
 -- SHAWARMAS
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('b2200000-0000-0000-0000-000000000010', 'b2000000-0000-0000-0000-000000000001', 'b2100000-0000-0000-0000-000000000002', 
    'Chicken Shawarma', 'Classic Lebanese chicken shawarma in fresh bread', 799, true),
   ('b2200000-0000-0000-0000-000000000011', 'b2000000-0000-0000-0000-000000000001', 'b2100000-0000-0000-0000-000000000002', 
@@ -73,7 +73,7 @@ INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_
    'Falafel Shawarma', 'Vegetarian shawarma with crispy falafel', 599, true);
 
 -- RICE BOWLS
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('b2200000-0000-0000-0000-000000000020', 'b2000000-0000-0000-0000-000000000001', 'b2100000-0000-0000-0000-000000000003', 
    'Chicken Rice Bowl', 'Grilled chicken served over aromatic Lebanese rice', 1099, true),
   ('b2200000-0000-0000-0000-000000000021', 'b2000000-0000-0000-0000-000000000001', 'b2100000-0000-0000-0000-000000000003', 
@@ -82,14 +82,14 @@ INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_
    'Rotisserie Chicken', 'Whole rotisserie chicken with your choice of sides', 2199, true);
 
 -- PLATTERS
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('b2200000-0000-0000-0000-000000000030', 'b2000000-0000-0000-0000-000000000001', 'b2100000-0000-0000-0000-000000000004', 
    'Shish Tawook Platter', 'Grilled chicken skewers served with rice, hummus & pickles', 1145, true),
   ('b2200000-0000-0000-0000-000000000031', 'b2000000-0000-0000-0000-000000000001', 'b2100000-0000-0000-0000-000000000004', 
    'Harra Shish Tawook Platter', 'Spicy grilled chicken skewers with rice, hummus & pickles', 1145, true);
 
 -- FRESH SALADS
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('b2200000-0000-0000-0000-000000000040', 'b2000000-0000-0000-0000-000000000001', 'b2100000-0000-0000-0000-000000000005', 
    'Fattoush', 'Classic Lebanese salad with crispy pita chips & sumac dressing', 540, true),
   ('b2200000-0000-0000-0000-000000000041', 'b2000000-0000-0000-0000-000000000001', 'b2100000-0000-0000-0000-000000000005', 
@@ -100,7 +100,7 @@ INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_
    'Falafel Salad', 'Fresh salad topped with crispy falafel', 620, true);
 
 -- FAMILY PLATTERS
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('b2200000-0000-0000-0000-000000000050', 'b2000000-0000-0000-0000-000000000001', 'b2100000-0000-0000-0000-000000000006', 
    'Family Platter (For 2)', '1 Classic & 1 Turkish Chicken Shawarma, 2 Kafta Kebabs, 4 Shish Tawook, Rice, Hummus, Pickles & 500ml Drink', 1900, true),
   ('b2200000-0000-0000-0000-000000000051', 'b2000000-0000-0000-0000-000000000001', 'b2100000-0000-0000-0000-000000000006', 
@@ -109,12 +109,12 @@ INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_
    'Family Platter (For 5)', '5 Turkish Shawarmas, 5 Adana Kebabs, 10 Shish Tawook, 10 Hara Shish Tawook, Hummus, Fattoush, Pickles, 2 Umm Ali & 1.5L Drink', 4300, true);
 
 -- KIDS DEAL
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('b2200000-0000-0000-0000-000000000060', 'b2000000-0000-0000-0000-000000000001', 'b2100000-0000-0000-0000-000000000007', 
    'Kids Deal', 'Lebanese Nuggets, Fries, Juice & Free Toy', 730, true);
 
 -- SWEET ENDINGS
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('b2200000-0000-0000-0000-000000000070', 'b2000000-0000-0000-0000-000000000001', 'b2100000-0000-0000-0000-000000000008', 
    'Baklava', 'Layers of flaky phyllo pastry with nuts & honey syrup', 450, true),
   ('b2200000-0000-0000-0000-000000000071', 'b2000000-0000-0000-0000-000000000001', 'b2100000-0000-0000-0000-000000000008', 
@@ -123,7 +123,7 @@ INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_
    'Lotus Cheesecake', 'Creamy cheesecake topped with Lotus Biscoff', 499, true);
 
 -- DRINKS
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('b2200000-0000-0000-0000-000000000080', 'b2000000-0000-0000-0000-000000000001', 'b2100000-0000-0000-0000-000000000009', 
    'Sulemani Tea', 'Traditional Lebanese black tea', 299, true),
   ('b2200000-0000-0000-0000-000000000081', 'b2000000-0000-0000-0000-000000000001', 'b2100000-0000-0000-0000-000000000009', 
@@ -132,7 +132,7 @@ INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_
    'Soft Drink', 'Coca-Cola, Pepsi, Sprite or 7Up', 119, true);
 
 -- ADD ONS & SAUCES
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('b2200000-0000-0000-0000-000000000090', 'b2000000-0000-0000-0000-000000000001', 'b2100000-0000-0000-0000-000000000010', 
    'Lebanese Khubz Bread', 'Traditional Lebanese flatbread', 120, true),
   ('b2200000-0000-0000-0000-000000000091', 'b2000000-0000-0000-0000-000000000001', 'b2100000-0000-0000-0000-000000000010', 

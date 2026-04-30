@@ -46,7 +46,7 @@ INSERT INTO categories (id, restaurant_id, name, sort_order) VALUES
 -- =============================================================================
 
 -- BURGERS
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('m4200000-0000-0000-0000-000000000001', 'm4000000-0000-0000-0000-000000000001', 'm4100000-0000-0000-0000-000000000001', 
    'Spicy Mexican Burger', 'Spicy chicken burger with Mexican flavors', 649, true),
   ('m4200000-0000-0000-0000-000000000002', 'm4000000-0000-0000-0000-000000000001', 'm4100000-0000-0000-0000-000000000001', 
@@ -61,7 +61,7 @@ INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_
    'Spicy Fillet Burger', 'Spicy chicken fillet burger', 579, true);
 
 -- WRAPS
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('m4200000-0000-0000-0000-000000000010', 'm4000000-0000-0000-0000-000000000001', 'm4100000-0000-0000-0000-000000000002', 
    'Mighty Wrap', 'Loaded chicken wrap with special sauce', 729, true),
   ('m4200000-0000-0000-0000-000000000011', 'm4000000-0000-0000-0000-000000000001', 'm4100000-0000-0000-0000-000000000002', 
@@ -72,7 +72,7 @@ INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_
    'Garlic Mustard Wrap', 'Chicken wrap with garlic mustard sauce', 729, true);
 
 -- CLASSIC PIZZAS (Pepperoni, Chicken Tikka, Chicken Fajita, Cheese Lover)
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('m4200000-0000-0000-0000-000000000020', 'm4000000-0000-0000-0000-000000000001', 'm4100000-0000-0000-0000-000000000003', 
    'Pepperoni Pizza', 'Classic pepperoni pizza', 269, true),
   ('m4200000-0000-0000-0000-000000000021', 'm4000000-0000-0000-0000-000000000001', 'm4100000-0000-0000-0000-000000000003', 
@@ -83,7 +83,7 @@ INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_
    'Cheese Lover Pizza', 'Extra cheese for cheese lovers', 269, true);
 
 -- PREMIUM PIZZAS (Malai Boti, BBQ Chicken, Mexican Xtras)
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('m4200000-0000-0000-0000-000000000030', 'm4000000-0000-0000-0000-000000000001', 'm4100000-0000-0000-0000-000000000004', 
    'Malai Boti Pizza', 'Creamy malai boti chicken pizza', 299, true),
   ('m4200000-0000-0000-0000-000000000031', 'm4000000-0000-0000-0000-000000000001', 'm4100000-0000-0000-0000-000000000004', 
@@ -92,14 +92,14 @@ INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_
    'Mexican Xtras Pizza', 'Spicy Mexican loaded pizza', 299, true);
 
 -- KEBAB TEMPTATION PIZZA
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('m4200000-0000-0000-0000-000000000040', 'm4000000-0000-0000-0000-000000000001', 'm4100000-0000-0000-0000-000000000005', 
    'Kebab Temptation Pizza', 'Special kebab-loaded pizza', 1149, true),
   ('m4200000-0000-0000-0000-000000000041', 'm4000000-0000-0000-0000-000000000001', 'm4100000-0000-0000-0000-000000000005', 
    '21 Inch Mighty Pizza', 'Massive 21 inch party pizza', 2999, true);
 
 -- FRIED CHICKEN
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('m4200000-0000-0000-0000-000000000050', 'm4000000-0000-0000-0000-000000000001', 'm4100000-0000-0000-0000-000000000006', 
    'Quarter Fried Chicken', '2pc Fried Chicken, Fries, 1 Bun, 1 Dip, 345ml Drink', 749, true),
   ('m4200000-0000-0000-0000-000000000051', 'm4000000-0000-0000-0000-000000000001', 'm4100000-0000-0000-0000-000000000006', 
@@ -108,7 +108,7 @@ INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_
    'Mighty Fried Chicken', '8pc Fried Chicken, Fries, 2 Buns, 2 Dips, 1.5L Drink', 2299, true);
 
 -- APPETIZERS
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('m4200000-0000-0000-0000-000000000060', 'm4000000-0000-0000-0000-000000000001', 'm4100000-0000-0000-0000-000000000007', 
    'Tacos', 'Crispy chicken tacos', 399, true),
   ('m4200000-0000-0000-0000-000000000061', 'm4000000-0000-0000-0000-000000000001', 'm4100000-0000-0000-0000-000000000007', 
@@ -121,28 +121,28 @@ INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_
    'Nuggets', 'Crispy chicken nuggets', 299, true);
 
 -- SANDWICHES
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('m4200000-0000-0000-0000-000000000070', 'm4000000-0000-0000-0000-000000000001', 'm4100000-0000-0000-0000-000000000008', 
    'Cocktail Sandwich', 'Classic cocktail sandwich', 699, true),
   ('m4200000-0000-0000-0000-000000000071', 'm4000000-0000-0000-0000-000000000001', 'm4100000-0000-0000-0000-000000000008', 
    'Cheese Melt Sandwich', 'Melted cheese loaded sandwich', 699, true);
 
 -- FRIES
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('m4200000-0000-0000-0000-000000000080', 'm4000000-0000-0000-0000-000000000001', 'm4100000-0000-0000-0000-000000000009', 
    'Plain Fries', 'Golden crispy fries', 179, true),
   ('m4200000-0000-0000-0000-000000000081', 'm4000000-0000-0000-0000-000000000001', 'm4100000-0000-0000-0000-000000000009', 
    'Loaded Fries', 'Fries loaded with cheese and toppings', 429, true);
 
 -- DESSERTS
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('m4200000-0000-0000-0000-000000000090', 'm4000000-0000-0000-0000-000000000001', 'm4100000-0000-0000-0000-000000000010', 
    'Brownie', 'Warm chocolate brownie', 199, true),
   ('m4200000-0000-0000-0000-000000000091', 'm4000000-0000-0000-0000-000000000001', 'm4100000-0000-0000-0000-000000000010', 
    'Brownie with Cream', 'Warm brownie served with cream', 299, true);
 
 -- DRINKS
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('m4200000-0000-0000-0000-000000000100', 'm4000000-0000-0000-0000-000000000001', 'm4100000-0000-0000-0000-000000000011', 
    'Soft Drink 345ml', 'Coca-Cola, Pepsi, Sprite or 7Up', 99, true),
   ('m4200000-0000-0000-0000-000000000101', 'm4000000-0000-0000-0000-000000000001', 'm4100000-0000-0000-0000-000000000011', 
@@ -153,7 +153,7 @@ INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_
    'Water 500ml', 'Mineral water', 79, true);
 
 -- DOUBLE DEALS
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('m4200000-0000-0000-0000-000000000110', 'm4000000-0000-0000-0000-000000000001', 'm4100000-0000-0000-0000-000000000012', 
    'Double Deal 1', '2 Mighty Wraps, 1 Loaded Fries, 500ml Drink', 1299, true),
   ('m4200000-0000-0000-0000-000000000111', 'm4000000-0000-0000-0000-000000000001', 'm4100000-0000-0000-0000-000000000012', 
@@ -168,7 +168,7 @@ INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_
    'Double Deal 6', '2 Mighty Sandwiches, Regular Fries, 2x345ml Drinks', 1499, true);
 
 -- FAMILY DEALS
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('m4200000-0000-0000-0000-000000000120', 'm4000000-0000-0000-0000-000000000001', 'm4100000-0000-0000-0000-000000000013', 
    'Family Deal 1', '21 Inch Mighty Pizza, 1.5L Drink', 2899, true),
   ('m4200000-0000-0000-0000-000000000121', 'm4000000-0000-0000-0000-000000000001', 'm4100000-0000-0000-0000-000000000013', 
@@ -181,14 +181,14 @@ INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_
    'Family Deal 5', '3 Small Pizzas, 500ml Drink', 1399, true);
 
 -- TRIPLE DEALS
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('m4200000-0000-0000-0000-000000000130', 'm4000000-0000-0000-0000-000000000001', 'm4100000-0000-0000-0000-000000000014', 
    'Triple Deal 1', '3 Mad Crispy Burgers, 1 Large Fries, 500ml Drink', 1799, true),
   ('m4200000-0000-0000-0000-000000000131', 'm4000000-0000-0000-0000-000000000001', 'm4100000-0000-0000-0000-000000000014', 
    'Triple Deal 2', '3 Medium Pizzas, 1.5L Drink', 2699, true);
 
 -- ADD ONS & DIPS
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('m4200000-0000-0000-0000-000000000140', 'm4000000-0000-0000-0000-000000000001', 'm4100000-0000-0000-0000-000000000015', 
    'Fried Chicken 1pc', 'Extra piece of fried chicken', 279, true),
   ('m4200000-0000-0000-0000-000000000141', 'm4000000-0000-0000-0000-000000000001', 'm4100000-0000-0000-0000-000000000015', 

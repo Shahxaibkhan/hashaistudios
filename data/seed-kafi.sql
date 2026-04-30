@@ -45,7 +45,7 @@ INSERT INTO categories (id, restaurant_id, name, sort_order) VALUES
 -- =============================================================================
 
 -- ORIGINAL COFFEE
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('k3200000-0000-0000-0000-000000000001', 'k3000000-0000-0000-0000-000000000001', 'k3100000-0000-0000-0000-000000000001', 
    'Double Shot Espresso', 'Rich double shot espresso - Plain or Dark Chocolate', 565, true),
   ('k3200000-0000-0000-0000-000000000002', 'k3000000-0000-0000-0000-000000000001', 'k3100000-0000-0000-0000-000000000001', 
@@ -60,7 +60,7 @@ INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_
    'V60 Single Origin', 'Premium pour-over - Ethiopian, Kenya AA, or Colombian - Hot or Cold', 930, true);
 
 -- BALANCED COFFEE
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('k3200000-0000-0000-0000-000000000010', 'k3000000-0000-0000-0000-000000000001', 'k3100000-0000-0000-0000-000000000002', 
    'Spanish Latte', 'Espresso with condensed milk - Hot or Iced', 750, true),
   ('k3200000-0000-0000-0000-000000000011', 'k3000000-0000-0000-0000-000000000001', 'k3100000-0000-0000-0000-000000000002', 
@@ -69,7 +69,7 @@ INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_
    'Plain Latte', 'Classic espresso with steamed milk - Hot or Iced', 750, true);
 
 -- FLAVOURED COFFEE
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('k3200000-0000-0000-0000-000000000020', 'k3000000-0000-0000-0000-000000000001', 'k3100000-0000-0000-0000-000000000003', 
    'Salted Jaggery Latte', 'Latte with salted jaggery sweetness - Hot or Iced', 750, true),
   ('k3200000-0000-0000-0000-000000000021', 'k3000000-0000-0000-0000-000000000001', 'k3100000-0000-0000-0000-000000000003', 
@@ -78,14 +78,14 @@ INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_
    'Pumpkin Spice Latte', 'Seasonal favorite with warm pumpkin spices', 750, true);
 
 -- MATCHA
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('k3200000-0000-0000-0000-000000000030', 'k3000000-0000-0000-0000-000000000001', 'k3100000-0000-0000-0000-000000000004', 
    'Plain Matcha', 'Premium Japanese matcha - Hot or Iced', 745, true),
   ('k3200000-0000-0000-0000-000000000031', 'k3000000-0000-0000-0000-000000000001', 'k3100000-0000-0000-0000-000000000004', 
    'Fruit Based Matcha', 'Matcha with fruit - Wildberry, Coconut, Mango, Strawberry or Lychee', 860, true);
 
 -- TEA & CHILLERS
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('k3200000-0000-0000-0000-000000000040', 'k3000000-0000-0000-0000-000000000001', 'k3100000-0000-0000-0000-000000000005', 
    'Peach Iced Tea', 'Refreshing iced tea with peach', 650, true),
   ('k3200000-0000-0000-0000-000000000041', 'k3000000-0000-0000-0000-000000000001', 'k3100000-0000-0000-0000-000000000005', 
@@ -100,7 +100,7 @@ INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_
    'Wildberry Chiller', 'Icy wildberry blend', 890, true);
 
 -- FRAPPE & CHOCOLATE
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('k3200000-0000-0000-0000-000000000050', 'k3000000-0000-0000-0000-000000000001', 'k3100000-0000-0000-0000-000000000006', 
    'Frappe', 'Blended iced coffee - Vanilla Bean, Hazelnut, Caramel or Mocha', 790, true),
   ('k3200000-0000-0000-0000-000000000051', 'k3000000-0000-0000-0000-000000000001', 'k3100000-0000-0000-0000-000000000006', 
@@ -111,7 +111,7 @@ INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_
    'Strawberry Milo', 'Strawberry chocolate malt drink', 790, true);
 
 -- PATISSERIE
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('k3200000-0000-0000-0000-000000000060', 'k3000000-0000-0000-0000-000000000001', 'k3100000-0000-0000-0000-000000000007', 
    'Dark Chocolate Tart', 'Rich dark chocolate in a buttery tart shell', 695, true),
   ('k3200000-0000-0000-0000-000000000061', 'k3000000-0000-0000-0000-000000000001', 'k3100000-0000-0000-0000-000000000007', 
@@ -138,7 +138,7 @@ INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_
    'Coconut Milk Cake', 'Light coconut-flavored sponge cake', 750, true);
 
 -- BAKERY
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('k3200000-0000-0000-0000-000000000080', 'k3000000-0000-0000-0000-000000000001', 'k3100000-0000-0000-0000-000000000008', 
    'Pain au Chocolate', 'Buttery croissant with chocolate filling', 750, true),
   ('k3200000-0000-0000-0000-000000000081', 'k3000000-0000-0000-0000-000000000001', 'k3100000-0000-0000-0000-000000000008', 
@@ -155,21 +155,21 @@ INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_
    'Fig & Honey Danish', 'Sweet fig and honey danish pastry', 695, true);
 
 -- COOKIES
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('k3200000-0000-0000-0000-000000000090', 'k3000000-0000-0000-0000-000000000001', 'k3100000-0000-0000-0000-000000000009', 
    'Triple Chocolate Cookie', 'Loaded with three types of chocolate', 550, true),
   ('k3200000-0000-0000-0000-000000000091', 'k3000000-0000-0000-0000-000000000001', 'k3100000-0000-0000-0000-000000000009', 
    'Raspberry Chocolate Cookie', 'Chocolate cookie with raspberry chunks', 590, true);
 
 -- BOWLS
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('k3200000-0000-0000-0000-000000000100', 'k3000000-0000-0000-0000-000000000001', 'k3100000-0000-0000-0000-000000000010', 
    'Roasted Quinoa Salad', 'Healthy quinoa bowl with roasted vegetables (215 kcal)', 950, true),
   ('k3200000-0000-0000-0000-000000000101', 'k3000000-0000-0000-0000-000000000001', 'k3100000-0000-0000-0000-000000000010', 
    'Protein Bowl', 'Power-packed protein bowl (360 kcal)', 1050, true);
 
 -- BREAKFAST
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('k3200000-0000-0000-0000-000000000110', 'k3000000-0000-0000-0000-000000000001', 'k3100000-0000-0000-0000-000000000011', 
    'Ham & Cheese Bagel', 'Toasted bagel with ham and melted cheese', 595, true),
   ('k3200000-0000-0000-0000-000000000111', 'k3000000-0000-0000-0000-000000000001', 'k3100000-0000-0000-0000-000000000011', 
@@ -178,7 +178,7 @@ INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_
    'Breakfast Sandwich', 'Classic breakfast sandwich with egg and cheese', 950, true);
 
 -- SANDWICHES
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('k3200000-0000-0000-0000-000000000120', 'k3000000-0000-0000-0000-000000000001', 'k3100000-0000-0000-0000-000000000012', 
    'Chicken Pesto Sourdough', 'Grilled chicken with basil pesto on sourdough', 1095, true),
   ('k3200000-0000-0000-0000-000000000121', 'k3000000-0000-0000-0000-000000000001', 'k3100000-0000-0000-0000-000000000012', 
@@ -189,14 +189,14 @@ INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_
    'Breaded Chicken Sando', 'Crispy breaded chicken on brioche', 950, true);
 
 -- DETROIT STYLE PIZZAS
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('k3200000-0000-0000-0000-000000000130', 'k3000000-0000-0000-0000-000000000001', 'k3100000-0000-0000-0000-000000000013', 
    'Spinach & Feta Pizza', 'Detroit-style with spinach and feta cheese', 950, true),
   ('k3200000-0000-0000-0000-000000000131', 'k3000000-0000-0000-0000-000000000001', 'k3100000-0000-0000-0000-000000000013', 
    'Roasted Mushroom & Truffle Pizza', 'Earthy mushrooms with truffle oil', 1050, true);
 
 -- SAVOURY
-INSERT INTO menu_items (id, restaurant_id, category_id, name, description, base_price, is_available) VALUES
+INSERT INTO menu_items (id, restaurant_id, category_id, name, description, price, is_available) VALUES
   ('k3200000-0000-0000-0000-000000000140', 'k3000000-0000-0000-0000-000000000001', 'k3100000-0000-0000-0000-000000000014', 
    'Chicken Puff', 'Flaky puff pastry with chicken filling', 560, true),
   ('k3200000-0000-0000-0000-000000000141', 'k3000000-0000-0000-0000-000000000001', 'k3100000-0000-0000-0000-000000000014', 
