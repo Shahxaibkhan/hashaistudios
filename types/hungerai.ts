@@ -43,6 +43,7 @@ export interface ItemOption {
   menu_item_id: string;
   label: string;
   price_delta: number; // additional Rs (can be 0)
+  option_type: "radio" | "checkbox";
 }
 
 export interface Order {

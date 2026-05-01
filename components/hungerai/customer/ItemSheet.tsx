@@ -12,13 +12,10 @@ interface ItemSheetProps {
   onAddToCart: (item: MenuItemWithOptions, qty: number, options: CartItemOption[]) => void;
 }
 
-// Detect if options are size-based (mutually exclusive)
-const SIZE_LABELS = ["small", "medium", "large", "regular", "s", "m", "l"];
-
+// Check if options are radio (mutually exclusive) based on option_type field
 function isSizeOption(options: ItemOption[]): boolean {
-  if (options.length < 2) return false;
-  const labels = options.map((o) => o.label.toLowerCase().trim());
-  return labels.every((label) => SIZE_LABELS.includes(label));
+  if (options.length === 0) return false;
+  return options.some((o) => o.option_type === "radio");
 }
 
 export default function ItemSheet({
@@ -33,16 +30,16 @@ export default function ItemSheet({
 
   const isSizeBasedItem = item ? isSizeOption(item.options) : false;
 
-  // Reset state when item changes, auto-select first size option
+  // Reset state when item changes, auto-select first radio option
   useEffect(() => {
     if (item) {
       setQuantity(1);
-      if (isSizeOption(item.options) && item.options.length > 0) {
-        const firstOption = item.options[0];
+      const firstRadio = item.options.find((o) => o.option_type === "radio");
+      if (firstRadio) {
         setSelectedOptions([{
-          id: firstOption.id,
-          label: firstOption.label,
-          price_delta: firstOption.price_delta,
+          id: firstRadio.id,
+          label: firstRadio.label,
+          price_delta: firstRadio.price_delta,
         }]);
       } else {
         setSelectedOptions([]);
@@ -142,15 +139,15 @@ export default function ItemSheet({
             </span>
           </div>
 
-          {/* Size Options (Radio buttons) */}
-          {isSizeBasedItem && item.options.length > 0 && (
+          {/* Radio Options (mutually exclusive - sizes) */}
+          {item.options.some((o) => o.option_type === "radio") && (
             <div className="mt-6">
               <h3 className="font-semibold mb-3 flex items-center gap-2">
                 Select Size
                 <span className="text-xs font-normal text-[var(--hai-text-muted)]">(Required)</span>
               </h3>
               <div className="flex gap-3">
-                {item.options.map((option) => {
+                {item.options.filter((o) => o.option_type === "radio").map((option) => {
                   const isSelected = selectedOptions.some((o) => o.id === option.id);
                   const totalPrice = item.price + option.price_delta;
                   return (
@@ -175,14 +172,14 @@ export default function ItemSheet({
             </div>
           )}
 
-          {/* Add-on Options (Checkboxes) */}
-          {!isSizeBasedItem && item.options.length > 0 && (
+          {/* Checkbox Options (add-ons) */}
+          {item.options.some((o) => o.option_type === "checkbox") && (
             <div className="mt-6">
               <h3 className="font-semibold mb-3">
                 Customize <span className="text-xs font-normal text-[var(--hai-text-muted)]">(Optional)</span>
               </h3>
               <div className="space-y-2">
-                {item.options.map((option) => {
+                {item.options.filter((o) => o.option_type === "checkbox").map((option) => {
                   const isSelected = selectedOptions.some((o) => o.id === option.id);
                   return (
                     <div
