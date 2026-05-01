@@ -21,8 +21,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Use admin client for inserting orders (bypasses RLS for public order creation)
-    const supabase = createAdminSupabaseClient();
+    // Use admin client if available, otherwise fall back to simple client (relies on RLS policy)
+    let supabase;
+    try {
+      supabase = createAdminSupabaseClient();
+    } catch {
+      // Fallback to simple client - RLS policy allows public order creation
+      supabase = createSimpleServerClient();
+    }
 
     // Insert order
     const { data: order, error: orderError } = await supabase

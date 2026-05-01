@@ -38,10 +38,10 @@ export default function OrderSummary({
 
       {/* Place Order Button */}
       <button
-        className={`hai-btn w-full mt-6 py-4 text-lg font-bold ${
+        className={`w-full mt-6 py-4 text-lg font-bold rounded-xl transition-all ${
           isDisabled || isSubmitting
-            ? "hai-btn-secondary cursor-not-allowed"
-            : "hai-btn-wa"
+            ? "bg-[var(--hai-bg-tertiary)] text-[var(--hai-text-muted)] cursor-not-allowed"
+            : "bg-[var(--hai-accent-primary)] text-white hover:bg-[var(--hai-accent-primary-hover)] shadow-lg"
         }`}
         onClick={onPlaceOrder}
         disabled={isDisabled || isSubmitting}
@@ -71,16 +71,9 @@ export default function OrderSummary({
             Placing Order...
           </span>
         ) : (
-          <>
-            📱 Place Order via WhatsApp →
-          </>
+          "Place Order"
         )}
       </button>
-
-      {/* Disclaimer */}
-      <p className="text-xs text-center text-[var(--hai-text-muted)] mt-3">
-        You&apos;ll be redirected to WhatsApp to send your order
-      </p>
     </div>
   );
 }

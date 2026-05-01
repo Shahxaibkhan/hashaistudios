@@ -12,11 +12,11 @@ interface DeliveryMapInnerProps {
   onPinChange: (lat: number, lng: number) => void;
 }
 
-// Custom red marker icon
-const redIcon = new L.Icon({
+// Custom orange marker icon
+const orangeIcon = new L.Icon({
   iconUrl: "data:image/svg+xml;base64," + btoa(`
     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="48" viewBox="0 0 32 48">
-      <path fill="#FF4444" d="M16 0C7.16 0 0 7.16 0 16c0 12 16 32 16 32s16-20 16-32c0-8.84-7.16-16-16-16z"/>
+      <path fill="#ff5722" d="M16 0C7.16 0 0 7.16 0 16c0 12 16 32 16 32s16-20 16-32c0-8.84-7.16-16-16-16z"/>
       <circle fill="white" cx="16" cy="16" r="6"/>
     </svg>
   `),
@@ -104,7 +104,7 @@ export default function DeliveryMapInner({
 
     // Add draggable marker
     const marker = L.marker([pinLat || centerLat, pinLng || centerLng], {
-      icon: redIcon,
+      icon: orangeIcon,
       draggable: true,
     }).addTo(map);
 
@@ -139,33 +139,33 @@ export default function DeliveryMapInner({
 
   return (
     <div>
-      {/* Use My Location Button */}
+      <div ref={containerRef} className="hai-map-container" />
+      <p className="text-sm text-[var(--hai-text-muted)] mt-2 text-center">
+        📍 Drag the pin or tap the map to set your delivery location
+      </p>
+      
+      {/* Use My Location Button - below map */}
       <button
         type="button"
         onClick={handleGetLocation}
         disabled={locating}
-        className="w-full mb-3 px-4 py-3 rounded-xl border border-[var(--hai-border-subtle)] bg-[var(--hai-bg-card)] text-[var(--hai-text-primary)] font-medium flex items-center justify-center gap-2 hover:bg-[var(--hai-bg-primary)] transition-colors disabled:opacity-50"
+        className="w-full mt-3 px-4 py-3 rounded-xl bg-[var(--hai-accent-primary-light)] border-2 border-[var(--hai-accent-primary)] text-[var(--hai-accent-primary)] text-sm font-semibold flex items-center justify-center gap-2 hover:bg-[var(--hai-accent-primary)] hover:text-white transition-colors disabled:opacity-50"
       >
         {locating ? (
           <>
             <span className="animate-spin">⏳</span>
-            Detecting location...
+            Detecting...
           </>
         ) : (
           <>
-            📍 Use My Current Location
+            📍 Detect My Location
           </>
         )}
       </button>
       
       {locationError && (
-        <p className="text-[var(--hai-accent-red)] text-sm mb-2 text-center">{locationError}</p>
+        <p className="text-[var(--hai-accent-red)] text-sm mt-2 text-center">{locationError}</p>
       )}
-
-      <div ref={containerRef} className="hai-map-container" />
-      <p className="text-sm text-[var(--hai-text-muted)] mt-2 text-center">
-        📍 Drag the pin or tap the map to set your delivery location
-      </p>
     </div>
   );
 }

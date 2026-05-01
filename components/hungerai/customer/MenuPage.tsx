@@ -85,7 +85,7 @@ export default function MenuPage({ restaurant }: MenuPageProps) {
                 className="rounded-full object-cover"
               />
             ) : (
-              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#ff6b35] to-[#f7931e] flex items-center justify-center text-xl font-bold text-white shadow-md">
+              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#ff5722] to-[#ff7043] flex items-center justify-center text-xl font-bold text-white shadow-md">
                 {restaurant.name.charAt(0)}
               </div>
             )}
