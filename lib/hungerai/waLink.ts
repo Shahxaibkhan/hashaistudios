@@ -89,36 +89,30 @@ export function buildOrderMessage(params: WaLinkParams): string {
     paymentMethod,
   } = params;
 
-  const divider = "———————————————";
   const itemLines = items.map(formatItemLine).join("\n");
-
-  // Build location link if coordinates provided
-  const locationLine =
-    deliveryLat && deliveryLng
-      ? `📍 *Location:* https://maps.google.com/?q=${deliveryLat},${deliveryLng}`
-      : "📍 *Location:* Not provided";
-
-  // Build address line
-  const addressLine = deliveryAddress
-    ? `🏠 *Address:* ${deliveryAddress}`
-    : "🏠 *Address:* Not provided";
 
   const paymentDisplay =
     paymentMethod === "cod" ? "Cash on Delivery" : "Online Payment";
 
-  const message = `🍔 *HungerAI Order #${orderNumber}*
-${divider}
+  // Build Google Maps link
+  const mapsLink =
+    deliveryLat && deliveryLng
+      ? `https://maps.google.com/?q=${deliveryLat},${deliveryLng}`
+      : null;
+
+  const message = `🍔 *Order #${orderNumber}*
+
 ${itemLines}
-${divider}
-${addressLine}
-${locationLine}
-👤 *Name:* ${customerName}
-📱 *WhatsApp:* ${formatPhoneForDisplay(customerWhatsApp)}
-💰 *Subtotal:* ${formatPrice(subtotal)}
-🚚 *Delivery:* To be confirmed
+💰 *Total:* ${formatPrice(subtotal)}
 💳 *Payment:* ${paymentDisplay}
-${divider}
-_Sent via HungerAI_`;
+
+👤 *Customer*
+${customerName}
+📱 ${formatPhoneForDisplay(customerWhatsApp)}
+
+📍 *Delivery Location*
+${deliveryAddress || "Not provided"}
+${mapsLink ? mapsLink : ""}`;
 
   return message;
 }
