@@ -92,7 +92,7 @@ export function buildOrderMessage(params: WaLinkParams): string {
   const itemLines = items.map(formatItemLine).join("\n");
 
   const paymentDisplay =
-    paymentMethod === "cod" ? "Cash on Delivery" : "Online Payment";
+    paymentMethod === "cod" ? "COD" : "Online";
 
   // Build Google Maps link
   const mapsLink =
@@ -100,19 +100,24 @@ export function buildOrderMessage(params: WaLinkParams): string {
       ? `https://maps.google.com/?q=${deliveryLat},${deliveryLng}`
       : null;
 
-  const message = `🍔 *Order #${orderNumber}*
+  const line = "━━━━━━━━━━━━━━━━";
+
+  const message = `${line}
+🍔 *ORDER #${orderNumber}*
+${line}
 
 ${itemLines}
-💰 *Total:* ${formatPrice(subtotal)}
-💳 *Payment:* ${paymentDisplay}
 
-👤 *Customer*
-${customerName}
+${line}
+💰 ${formatPrice(subtotal)} · ${paymentDisplay}
+${line}
+
+👤 ${customerName}
 📱 ${formatPhoneForDisplay(customerWhatsApp)}
 
-📍 *Delivery Location*
-${deliveryAddress || "Not provided"}
-${mapsLink ? mapsLink : ""}`;
+📍 ${deliveryAddress || "Not provided"}
+${mapsLink ? mapsLink : ""}
+${line}`;
 
   return message;
 }
