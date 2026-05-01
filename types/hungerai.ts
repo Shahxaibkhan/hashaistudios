@@ -261,18 +261,21 @@ export interface Database {
           menu_item_id: string;
           label: string;
           price_delta: number;
+          option_type: string;
         };
         Insert: {
           id?: string;
           menu_item_id: string;
           label: string;
           price_delta?: number;
+          option_type?: string;
         };
         Update: {
           id?: string;
           menu_item_id?: string;
           label?: string;
           price_delta?: number;
+          option_type?: string;
         };
       };
       orders: {

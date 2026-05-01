@@ -15,7 +15,8 @@ interface ItemSheetProps {
 // Check if options are radio (mutually exclusive) based on option_type field
 function isSizeOption(options: ItemOption[]): boolean {
   if (options.length === 0) return false;
-  return options.some((o) => o.option_type === "radio");
+  // Default to 'radio' if option_type is missing
+  return options.some((o) => (o.option_type ?? "radio") === "radio");
 }
 
 export default function ItemSheet({
@@ -34,7 +35,7 @@ export default function ItemSheet({
   useEffect(() => {
     if (item) {
       setQuantity(1);
-      const firstRadio = item.options.find((o) => o.option_type === "radio");
+      const firstRadio = item.options.find((o) => (o.option_type ?? "radio") === "radio");
       if (firstRadio) {
         setSelectedOptions([{
           id: firstRadio.id,
@@ -140,14 +141,14 @@ export default function ItemSheet({
           </div>
 
           {/* Radio Options (mutually exclusive - sizes) */}
-          {item.options.some((o) => o.option_type === "radio") && (
+          {item.options.some((o) => (o.option_type ?? "radio") === "radio") && (
             <div className="mt-6">
               <h3 className="font-semibold mb-3 flex items-center gap-2">
                 Select Size
                 <span className="text-xs font-normal text-[var(--hai-text-muted)]">(Required)</span>
               </h3>
               <div className="flex gap-3">
-                {item.options.filter((o) => o.option_type === "radio").map((option) => {
+                {item.options.filter((o) => (o.option_type ?? "radio") === "radio").map((option) => {
                   const isSelected = selectedOptions.some((o) => o.id === option.id);
                   const totalPrice = item.price + option.price_delta;
                   return (
