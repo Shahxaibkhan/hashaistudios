@@ -60,6 +60,12 @@ export default function MenuPage({ restaurant }: MenuPageProps) {
 
   const handleQuickAdd = (item: MenuItemWithOptions) => {
     if (!restaurant.is_open) return;
+    // If item has options, open sheet for customization
+    if (item.options.length > 0) {
+      setSelectedItem(item);
+      setIsSheetOpen(true);
+      return;
+    }
     cart.addItem(item, 1, []);
   };
 
