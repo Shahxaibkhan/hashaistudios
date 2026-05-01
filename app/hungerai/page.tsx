@@ -65,8 +65,8 @@ export default function HungerAILandingPage() {
               <div className="text-sm text-[var(--hai-text-muted)] mt-1">WhatsApp Users</div>
             </div>
             <div>
-              <div className="text-3xl md:text-4xl font-bold text-[var(--hai-accent-primary)]">5 min</div>
-              <div className="text-sm text-[var(--hai-text-muted)] mt-1">Setup Time</div>
+              <div className="text-3xl md:text-4xl font-bold text-[var(--hai-accent-primary)]">24/7</div>
+              <div className="text-sm text-[var(--hai-text-muted)] mt-1">Support</div>
             </div>
           </div>
         </div>
@@ -146,7 +146,7 @@ export default function HungerAILandingPage() {
               How It Works
             </h2>
             <p className="text-[var(--hai-text-secondary)]">
-              Three simple steps to start receiving orders
+              Your journey to WhatsApp orders
             </p>
           </div>
 
@@ -154,21 +154,21 @@ export default function HungerAILandingPage() {
             {[
               {
                 step: "1",
-                title: "Share Your Menu",
+                title: "Book a Consultation",
                 description:
-                  "Send us your menu and WhatsApp number. We'll set up your branded page.",
+                  "We discuss your menu, branding, and delivery zones to understand your needs.",
               },
               {
                 step: "2",
-                title: "Share The Link",
+                title: "We Build Your System",
                 description:
-                  "Get your unique link. Share it on social media, QR codes, or your website.",
+                  "Our team creates your custom ordering page with your branding and menu.",
               },
               {
                 step: "3",
-                title: "Receive Orders",
+                title: "Go Live & Grow",
                 description:
-                  "Orders arrive in WhatsApp with items, location, and customer details.",
+                  "Launch your ordering page, receive orders, and get ongoing support.",
               },
             ].map((item, i) => (
               <div key={i} className="text-center">
