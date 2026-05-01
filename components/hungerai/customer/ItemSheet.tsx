@@ -141,37 +141,63 @@ export default function ItemSheet({
           </div>
 
           {/* Radio Options (mutually exclusive - sizes) */}
-          {item.options.some((o) => (o.option_type ?? "radio") === "radio") && (
-            <div className="mt-6">
-              <h3 className="font-semibold mb-3 flex items-center gap-2">
-                Select Size
-                <span className="text-xs font-normal text-[var(--hai-text-muted)]">(Required)</span>
-              </h3>
-              <div className="flex gap-3">
-                {item.options.filter((o) => (o.option_type ?? "radio") === "radio").map((option) => {
-                  const isSelected = selectedOptions.some((o) => o.id === option.id);
-                  const totalPrice = item.price + option.price_delta;
-                  return (
-                    <button
-                      key={option.id}
-                      type="button"
-                      className={`hai-size-btn ${isSelected ? "active" : ""}`}
-                      onClick={() =>
-                        selectSizeOption({
-                          id: option.id,
-                          label: option.label,
-                          price_delta: option.price_delta,
-                        })
-                      }
-                    >
-                      <div className="size-label">{option.label}</div>
-                      <div className="size-price">Rs {totalPrice.toLocaleString("en-PK")}</div>
-                    </button>
-                  );
-                })}
+          {item.options.some((o) => (o.option_type ?? "radio") === "radio") && (() => {
+            const radioOptions = item.options.filter((o) => (o.option_type ?? "radio") === "radio");
+            const useCards = radioOptions.length <= 4;
+            return (
+              <div className="mt-6">
+                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                  Select Size
+                  <span className="text-xs font-normal text-[var(--hai-text-muted)]">(Required)</span>
+                </h3>
+                {useCards ? (
+                  <div className="flex flex-wrap gap-3">
+                    {radioOptions.map((option) => {
+                      const isSelected = selectedOptions.some((o) => o.id === option.id);
+                      const totalPrice = item.price + option.price_delta;
+                      return (
+                        <button
+                          key={option.id}
+                          type="button"
+                          className={`hai-size-btn ${isSelected ? "active" : ""}`}
+                          onClick={() => selectSizeOption({ id: option.id, label: option.label, price_delta: option.price_delta })}
+                        >
+                          <div className="size-label">{option.label}</div>
+                          <div className="size-price">Rs {totalPrice.toLocaleString("en-PK")}</div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {radioOptions.map((option) => {
+                      const isSelected = selectedOptions.some((o) => o.id === option.id);
+                      const totalPrice = item.price + option.price_delta;
+                      return (
+                        <div
+                          key={option.id}
+                          className={`hai-checkbox ${isSelected ? "checked" : ""}`}
+                          onClick={() => selectSizeOption({ id: option.id, label: option.label, price_delta: option.price_delta })}
+                        >
+                          <div className={`hai-checkbox-box ${isSelected ? "rounded-full" : "rounded-full"}`}>
+                            {isSelected && (
+                              <div className="w-2.5 h-2.5 rounded-full bg-white" />
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <span>{option.label}</span>
+                          </div>
+                          <span className="text-[var(--hai-text-muted)] text-sm font-medium">
+                            Rs {totalPrice.toLocaleString("en-PK")}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* Checkbox Options (add-ons) */}
           {item.options.some((o) => o.option_type === "checkbox") && (
