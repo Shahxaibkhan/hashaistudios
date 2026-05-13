@@ -162,124 +162,92 @@ export default function AdminPage() {
         );
       })()}
 
-      {/* Restaurants Table */}
+      {/* Restaurants List */}
       <div className="hai-card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-[var(--hai-border-subtle)]">
-                <th className="text-left px-4 py-3 text-sm font-medium text-[var(--hai-text-muted)]">
-                  Restaurant
-                </th>
-                <th className="text-left px-4 py-3 text-sm font-medium text-[var(--hai-text-muted)]">
-                  Slug
-                </th>
-                <th className="text-left px-4 py-3 text-sm font-medium text-[var(--hai-text-muted)]">
-                  Owner
-                </th>
-                <th className="text-left px-4 py-3 text-sm font-medium text-[var(--hai-text-muted)]">
-                  WhatsApp
-                </th>
-                <th className="text-left px-4 py-3 text-sm font-medium text-[var(--hai-text-muted)]">
-                  Status
-                </th>
-                <th className="text-left px-4 py-3 text-sm font-medium text-[var(--hai-text-muted)]">
-                  Subscription
-                </th>
-                <th className="text-left px-4 py-3 text-sm font-medium text-[var(--hai-text-muted)]">
-                  Expires
-                </th>
-                <th className="text-left px-4 py-3 text-sm font-medium text-[var(--hai-text-muted)]">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {restaurants.map((restaurant) => (
-                <tr
-                  key={restaurant.id}
-                  className="border-b border-[var(--hai-border-subtle)] last:border-0"
-                >
-                  <td className="px-4 py-3 font-medium">{restaurant.name}</td>
-                  <td className="px-4 py-3 text-sm text-[var(--hai-text-muted)]">
-                    /{restaurant.slug}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-[var(--hai-text-muted)]">
-                    {restaurant.owner_email || "—"}
-                  </td>
-                  <td className="px-4 py-3 text-sm">
-                    <a
-                      href={`https://wa.me/${restaurant.whatsapp_number}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[var(--hai-accent-wa)] hover:underline"
-                    >
-                      {restaurant.whatsapp_number}
-                    </a>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs ${
-                        restaurant.is_open
-                          ? "bg-[var(--hai-accent-green)]/20 text-[var(--hai-accent-green)]"
-                          : "bg-[var(--hai-accent-red)]/20 text-[var(--hai-accent-red)]"
-                      }`}
-                    >
-                      {restaurant.is_open ? "Open" : "Closed"}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    {(() => {
-                      const s = (restaurant as any).subscription_status as SubStatus | undefined;
-                      const colors: Record<string, string> = {
-                        trial: "bg-blue-500/20 text-blue-400",
-                        active: "bg-[var(--hai-accent-green)]/20 text-[var(--hai-accent-green)]",
-                        expired: "bg-[var(--hai-accent-red)]/20 text-[var(--hai-accent-red)]",
-                        suspended: "bg-yellow-500/20 text-yellow-400",
-                      };
-                      const label = s ? s.charAt(0).toUpperCase() + s.slice(1) : "Trial";
-                      return (
-                        <span className={`px-2 py-1 rounded-full text-xs ${colors[s || "trial"]}`}>
-                          {label}
-                        </span>
-                      );
-                    })()}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-[var(--hai-text-muted)]">
-                    {(() => {
-                      const plan = (restaurant as any).subscription_plan as SubPlan | null;
-                      const exp = (restaurant as any).subscription_expires_at as string | null;
-                      if (!plan) return "—";
-                      const planLabel = { starter: "Starter", boost: "Boost", pro: "Pro" }[plan];
-                      if (!exp) return planLabel;
-                      const days = Math.ceil((new Date(exp).getTime() - Date.now()) / 86400000);
-                      return `${planLabel} · ${days > 0 ? `${days}d left` : "Expired"}`;
-                    })()}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <a
-                        href={`/hungerai/${restaurant.slug}`}
-                        target="_blank"
-                        className="text-sm text-[var(--hai-accent-green)] hover:underline"
-                      >
-                        View Menu
-                      </a>
-                      <button
-                        onClick={() => setSubModal(restaurant)}
-                        className="text-sm text-[var(--hai-text-muted)] hover:text-white underline"
-                      >
-                        Subscription
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        {/* Header row */}
+        <div className="grid px-4 py-2 border-b border-[var(--hai-border-subtle)]"
+          style={{ gridTemplateColumns: "2fr 2fr 1.5fr 1fr 1.2fr 2fr" }}>
+          {["Restaurant","Owner","WhatsApp","Status","Subscription","Actions"].map(h => (
+            <span key={h} className="text-xs font-semibold text-[var(--hai-text-muted)] uppercase tracking-wide">{h}</span>
+          ))}
         </div>
-      </div>
 
+        {/* Data rows */}
+        {restaurants.map((restaurant) => {
+          const r = restaurant as any;
+          const subStatus: SubStatus = r.subscription_status || "trial";
+          const plan: SubPlan | null = r.subscription_plan || null;
+          const exp: string | null = r.subscription_expires_at || null;
+          const daysLeft = exp ? Math.ceil((new Date(exp).getTime() - Date.now()) / 86400000) : null;
+
+          const subColors: Record<string, string> = {
+            trial: "bg-blue-500/20 text-blue-400",
+            active: "bg-[var(--hai-accent-green)]/20 text-[var(--hai-accent-green)]",
+            expired: "bg-[var(--hai-accent-red)]/20 text-[var(--hai-accent-red)]",
+            suspended: "bg-yellow-500/20 text-yellow-400",
+          };
+
+          return (
+            <div key={restaurant.id}
+              className="grid px-4 py-3 border-b border-[var(--hai-border-subtle)] last:border-0 hover:bg-white/5 transition-colors items-center"
+              style={{ gridTemplateColumns: "2fr 2fr 1.5fr 1fr 1.2fr 2fr" }}>
+
+              {/* Restaurant */}
+              <div className="min-w-0">
+                <p className="font-semibold text-sm truncate">{restaurant.name}</p>
+                <p className="text-xs text-[var(--hai-text-muted)] truncate">/{restaurant.slug}</p>
+              </div>
+
+              {/* Owner */}
+              <p className="text-sm text-[var(--hai-text-muted)] truncate pr-2">{restaurant.owner_email || "—"}</p>
+
+              {/* WhatsApp */}
+              <a href={`https://wa.me/${restaurant.whatsapp_number}`} target="_blank" rel="noopener noreferrer"
+                className="text-sm text-[var(--hai-accent-wa)] hover:underline truncate">
+                {restaurant.whatsapp_number}
+              </a>
+
+              {/* Status */}
+              <span className={`text-xs font-medium px-2 py-1 rounded-full w-fit ${
+                restaurant.is_open
+                  ? "bg-[var(--hai-accent-green)]/20 text-[var(--hai-accent-green)]"
+                  : "bg-[var(--hai-accent-red)]/20 text-[var(--hai-accent-red)]"
+              }`}>
+                {restaurant.is_open ? "Open" : "Closed"}
+              </span>
+
+              {/* Subscription */}
+              <div className="flex flex-col gap-0.5">
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full w-fit ${subColors[subStatus]}`}>
+                  {subStatus.charAt(0).toUpperCase() + subStatus.slice(1)}
+                </span>
+                {plan && (
+                  <span className="text-xs text-[var(--hai-text-muted)]">
+                    {plan.charAt(0).toUpperCase() + plan.slice(1)}
+                    {daysLeft !== null && (
+                      <span className={daysLeft <= 7 ? " text-yellow-400" : ""}>
+                        {" · "}{daysLeft > 0 ? `${daysLeft}d` : "expired"}
+                      </span>
+                    )}
+                  </span>
+                )}
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center gap-3 whitespace-nowrap">
+                <a href={`/hungerai/${restaurant.slug}`} target="_blank"
+                  className="text-xs font-medium text-[var(--hai-accent-green)] hover:underline whitespace-nowrap">
+                  View Menu
+                </a>
+                <button onClick={() => setSubModal(restaurant)}
+                  className="text-xs text-[var(--hai-text-muted)] hover:text-white underline whitespace-nowrap">
+                  Subscription
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
       {/* Add Restaurant Modal */}
       {showAddModal && (
         <AddRestaurantModal
