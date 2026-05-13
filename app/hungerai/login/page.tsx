@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/hungerai/supabase";
 
+const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL || "";
+
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -18,7 +20,7 @@ export default function LoginPage() {
 
     const supabase = createBrowserSupabaseClient();
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -29,7 +31,12 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/hungerai/dashboard");
+    // Redirect admin to admin panel, others to dashboard
+    if (data.user?.email === ADMIN_EMAIL) {
+      router.push("/hungerai/admin");
+    } else {
+      router.push("/hungerai/dashboard");
+    }
   };
 
   return (
@@ -37,14 +44,14 @@ export default function LoginPage() {
       <div className="w-full max-w-[400px]">
         {/* Logo & Brand */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-[#ff6b35] to-[#f7931e] shadow-lg shadow-[rgba(255,107,53,0.3)] mb-6">
-            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-            </svg>
-          </div>
-          <h1 className="font-display text-3xl font-bold tracking-tight text-[var(--hai-text-primary)]">HungerAI</h1>
+          <img
+            src="/branding/hungerai-logo.png"
+            alt="HungerAI"
+            style={{ height: 48, width: "auto", margin: "0 auto 24px" }}
+            draggable={false}
+          />
           <p className="text-[var(--hai-text-muted)] mt-2 text-sm">
-            Restaurant Management Dashboard
+            Sign in to manage your restaurants
           </p>
         </div>
 

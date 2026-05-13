@@ -18,6 +18,12 @@ export default function AdminPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [subModal, setSubModal] = useState<Restaurant | null>(null);
 
+  const handleSignOut = async () => {
+    const supabase = createBrowserSupabaseClient();
+    await supabase.auth.signOut();
+    router.push("/hungerai/login");
+  };
+
   useEffect(() => {
     const checkAdmin = async () => {
       const supabase = createBrowserSupabaseClient();
@@ -64,44 +70,97 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen px-4 py-6">
+    <div className="min-h-screen px-4 py-6 max-w-6xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="font-display text-2xl font-bold">Admin Panel</h1>
-          <p className="text-[var(--hai-text-muted)]">
-            Manage all HungerAI restaurants
-          </p>
+      <div className="flex items-center justify-between mb-8">
+        <img src="/branding/hungerai-logo.png" alt="HungerAI" style={{ height: 36, width: "auto" }} draggable={false} />
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="hai-btn hai-btn-primary"
+          >
+            + Add Restaurant
+          </button>
+          <button
+            onClick={handleSignOut}
+            className="hai-btn hai-btn-secondary"
+          >
+            Sign Out
+          </button>
         </div>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="hai-btn hai-btn-primary"
-        >
-          + Add Restaurant
-        </button>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="hai-card p-4 text-center">
-          <p className="text-3xl font-bold text-[var(--hai-accent-green)]">
-            {restaurants.length}
-          </p>
-          <p className="text-sm text-[var(--hai-text-muted)]">Restaurants</p>
-        </div>
-        <div className="hai-card p-4 text-center">
-          <p className="text-3xl font-bold text-[var(--hai-accent-green)]">
-            {restaurants.filter((r) => r.is_open).length}
-          </p>
-          <p className="text-sm text-[var(--hai-text-muted)]">Open Now</p>
-        </div>
-        <div className="hai-card p-4 text-center">
-          <p className="text-3xl font-bold text-[var(--hai-accent-amber)]">
-            {restaurants.filter((r) => !r.is_open).length}
-          </p>
-          <p className="text-sm text-[var(--hai-text-muted)]">Closed</p>
-        </div>
-      </div>
+      {(() => {
+        const rs = restaurants as any[];
+        const active = rs.filter(r => r.subscription_status === "active").length;
+        const trial = rs.filter(r => r.subscription_status === "trial").length;
+        const expired = rs.filter(r => r.subscription_status === "expired" || r.subscription_status === "suspended").length;
+        const expiringSoon = rs.filter(r => {
+          if (r.subscription_status !== "active" || !r.subscription_expires_at) return false;
+          const days = Math.ceil((new Date(r.subscription_expires_at).getTime() - Date.now()) / 86400000);
+          return days <= 7 && days > 0;
+        }).length;
+        const MRR_MAP: Record<string, number> = { starter: 3999, boost: 4999, pro: 6999 };
+        const mrr = rs.filter(r => r.subscription_status === "active" && r.subscription_plan)
+          .reduce((sum: number, r: any) => sum + (MRR_MAP[r.subscription_plan] || 0), 0);
+
+        const stats = [
+          { label: "Total Restaurants", value: restaurants.length, color: "var(--hai-text-primary)", sub: "all time" },
+          { label: "Active", value: active, color: "#22c55e", sub: "subscribed" },
+          { label: "On Trial", value: trial, color: "#60a5fa", sub: "free tier" },
+          { label: "Expired / Suspended", value: expired, color: "#ef4444", sub: "no access" },
+          { label: "Expiring ≤ 7 days", value: expiringSoon, color: "#f59e0b", sub: "needs renewal" },
+          { label: "Est. MRR", value: `Rs. ${mrr.toLocaleString()}`, color: "#a78bfa", sub: "active plans" },
+        ];
+
+        return (
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+            {stats.map((s) => (
+              <div key={s.label} className="hai-card p-4">
+                <p className="text-xs text-[var(--hai-text-muted)] mb-1 uppercase tracking-wide">{s.label}</p>
+                <p className="text-2xl font-bold" style={{ color: s.color }}>{s.value}</p>
+                <p className="text-xs text-[var(--hai-text-muted)] mt-0.5">{s.sub}</p>
+              </div>
+            ))}
+          </div>
+        );
+      })()}
+
+      {/* Subscription breakdown bar */}
+      {restaurants.length > 0 && (() => {
+        const rs = restaurants as any[];
+        const counts: Record<string, number> = { starter: 0, boost: 0, pro: 0 };
+        rs.filter(r => r.subscription_status === "active" && r.subscription_plan)
+          .forEach((r: any) => { counts[r.subscription_plan] = (counts[r.subscription_plan] || 0) + 1; });
+        const total = Object.values(counts).reduce((a, b) => a + b, 0);
+        const plans = [
+          { key: "starter", label: "Starter", color: "#60a5fa" },
+          { key: "boost",   label: "Boost",   color: "#f97316" },
+          { key: "pro",     label: "Pro",     color: "#a78bfa" },
+        ];
+        if (total === 0) return null;
+        return (
+          <div className="hai-card p-4 mb-6">
+            <p className="text-xs text-[var(--hai-text-muted)] uppercase tracking-wide mb-3">Active Plan Distribution</p>
+            <div className="flex rounded-full overflow-hidden h-3 mb-3">
+              {plans.map(p => (
+                counts[p.key] > 0 && (
+                  <div key={p.key} style={{ width: `${(counts[p.key] / total) * 100}%`, background: p.color }} />
+                )
+              ))}
+            </div>
+            <div className="flex gap-4">
+              {plans.map(p => (
+                <div key={p.key} className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full" style={{ background: p.color }} />
+                  <span className="text-xs text-[var(--hai-text-muted)]">{p.label} <strong className="text-[var(--hai-text-primary)]">{counts[p.key]}</strong></span>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Restaurants Table */}
       <div className="hai-card overflow-hidden">
