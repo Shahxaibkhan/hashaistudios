@@ -20,9 +20,9 @@
   --hai-text-dim: #94a3b8;
 
   /* Brand accent - Red/Orange (High-conversion) */
-  --hai-accent-primary: #ff5722;
-  --hai-accent-primary-hover: #e64a19;
-  --hai-accent-primary-light: rgba(255, 87, 34, 0.12);
+  --hai-accent-primary: #FF5A1F;
+  --hai-accent-primary-hover: #e64e18;
+  --hai-accent-primary-light: rgba(255, 90, 31, 0.12);
   --hai-accent-green: #22c55e;
   --hai-accent-green-light: rgba(34, 197, 94, 0.1);
   --hai-accent-red: #ef4444;
@@ -63,7 +63,7 @@
   background: var(--hai-bg-primary);
   color: var(--hai-text-primary);
   min-height: 100vh;
-  font-family: var(--font-dm-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-nunito), var(--font-dm-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -894,3 +894,279 @@
     transform: scale(0.99);
   }
 }
+
+/* ============================================
+   HUNGERAI LOGO
+   ============================================ */
+
+/*
+  Reference storyboard breakdown:
+  1. Full wordmark: HUNGER (dark, extrabold) + orange filled bubble (white Ai)
+  2. HUNGER starts compressing inward from both sides
+  3. HUNGER squeezes to nothing, bubble remains
+  4. Bubble flies right with speed/motion blur lines
+  5. Bubble transitions to outlined style (orange border, white fill, dark Hi)
+  6. Final clean icon: orange gradient border, white fill, dark Hi text
+*/
+
+.hungerai-logo {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  user-select: none;
+  font-family: var(--font-nunito), "Nunito Sans", -apple-system, sans-serif;
+  position: relative;
+}
+
+/* ── HUNGER text ── */
+.hungerai-logo__hunger {
+  font-weight: 800;
+  color: #1a1a1a;
+  letter-spacing: -0.02em;
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  margin-right: 0.08em;
+  transform-origin: center center;
+  /* Prevent layout shift during animation by reserving inline space */
+  will-change: transform, opacity, max-width;
+}
+
+/* ── Bubble wrapper — positions both filled + outlined bubbles on top of each other ── */
+.hungerai-logo__bubble-wrap {
+  position: relative;
+  display: inline-grid;
+  align-items: center;
+  justify-items: center;
+  will-change: transform;
+}
+
+/* ── Shared bubble base ── */
+.hungerai-logo__bubble-filled,
+.hungerai-logo__bubble-outlined {
+  grid-area: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.7em;
+  height: 1.52em;
+  border-radius: 0.28em;
+  position: relative;
+}
+
+/* Tail for both bubbles — bottom-left */
+.hungerai-logo__bubble-filled::after,
+.hungerai-logo__bubble-outlined::after {
+  content: "";
+  position: absolute;
+  bottom: -0.19em;
+  left: 0.22em;
+  width: 0.36em;
+  height: 0.2em;
+  /* Trapezoid tail shape */
+  clip-path: polygon(0 0, 40% 0, 100% 100%, 0% 100%);
+}
+
+/* ── Filled bubble (orange bg, white text — wordmark state) ── */
+.hungerai-logo__bubble-filled {
+  background: #FF5A1F;
+}
+.hungerai-logo__bubble-filled::after {
+  background: #FF5A1F;
+}
+
+/* ── Outlined bubble (white bg, orange border — icon state) ── */
+.hungerai-logo__bubble-outlined {
+  background: white;
+  /* Layered box-shadow creates the orange gradient border effect */
+  box-shadow:
+    0 0 0 0.07em #FF5A1F,
+    0 0 0 0.1em rgba(255, 90, 31, 0.25);
+}
+.hungerai-logo__bubble-outlined::after {
+  background: #FF5A1F;
+}
+
+/* ── Ai text (inside filled orange bubble) ── */
+.hungerai-logo__ai-text {
+  font-size: 0.78em;
+  font-weight: 800;
+  color: white;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 0.02em;
+}
+.hungerai-logo__A { font-weight: 800; }
+.hungerai-logo__i  { font-weight: 400; font-style: italic; }
+
+/* ── Hi text (inside outlined bubble) ── */
+.hungerai-logo__hi-text {
+  font-size: 0.78em;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 0.02em;
+  color: #1a1a1a;
+}
+.hungerai-logo__H  { font-weight: 800; color: #1a1a1a; }
+.hungerai-logo__i2 { font-weight: 700; color: #FF5A1F; }
+
+/* ==============================================
+   STATIC VARIANTS
+   ============================================== */
+
+/* wordmark: show filled bubble + Ai, hide outlined */
+.hungerai-logo--wordmark .hungerai-logo__bubble-outlined { opacity: 0; }
+.hungerai-logo--wordmark .hungerai-logo__bubble-filled   { opacity: 1; }
+
+/* icon: show outlined bubble + Hi, hide filled, no hunger text */
+.hungerai-logo--icon .hungerai-logo__bubble-filled   { opacity: 0; }
+.hungerai-logo--icon .hungerai-logo__bubble-outlined { opacity: 1; }
+
+/* ==============================================
+   ANIMATED VARIANT  (wordmark → Hi icon)
+   Total: 3.6s, stays on final icon forever
+   ============================================== */
+
+.hungerai-logo--animated .hungerai-logo__hunger {
+  animation: logoHungerSqueeze 3.6s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+}
+
+.hungerai-logo--animated .hungerai-logo__bubble-wrap {
+  animation: logoBubbleWhoosh 3.6s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+}
+
+/* Filled bubble fades out as outlined fades in */
+.hungerai-logo--animated .hungerai-logo__bubble-filled {
+  animation: logoFilledOut 3.6s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+}
+.hungerai-logo--animated .hungerai-logo__bubble-outlined {
+  animation: logoOutlinedIn 3.6s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+}
+
+/* ── Phase 1 (0–30%): Hold wordmark ── */
+/* ── Phase 2 (30–55%): HUNGER compresses from both sides ── */
+/* ── Phase 3 (55–72%): HUNGER gone, bubble builds momentum ── */
+/* ── Phase 4 (72–85%): Bubble whooshes right with blur ── */
+/* ── Phase 5 (85–100%): Settle into clean icon ── */
+
+@keyframes logoHungerSqueeze {
+  0%, 28% {
+    max-width: 7em;
+    opacity: 1;
+    margin-right: 0.08em;
+    transform: scaleX(1);
+    letter-spacing: -0.02em;
+  }
+  50% {
+    max-width: 2.5em;
+    opacity: 0.6;
+    margin-right: 0.03em;
+    transform: scaleX(0.5);
+    letter-spacing: -0.08em;
+  }
+  68% {
+    max-width: 0;
+    opacity: 0;
+    margin-right: 0;
+    transform: scaleX(0);
+    letter-spacing: -0.2em;
+  }
+  100% {
+    max-width: 0;
+    opacity: 0;
+    margin-right: 0;
+    transform: scaleX(0);
+  }
+}
+
+@keyframes logoBubbleWhoosh {
+  0%, 55% {
+    transform: translateX(0) scaleX(1);
+    filter: blur(0px);
+  }
+  /* Speed lines — stretch horizontally and add motion blur */
+  72% {
+    transform: translateX(0.6em) scaleX(1.18);
+    filter: blur(2px);
+  }
+  /* Overshoot then settle */
+  82% {
+    transform: translateX(-0.08em) scaleX(0.96);
+    filter: blur(0px);
+  }
+  90% {
+    transform: translateX(0.03em) scaleX(1.02);
+    filter: blur(0px);
+  }
+  100% {
+    transform: translateX(0) scaleX(1);
+    filter: blur(0px);
+  }
+}
+
+@keyframes logoFilledOut {
+  0%, 62%  { opacity: 1; }
+  80%      { opacity: 0; }
+  100%     { opacity: 0; }
+}
+
+@keyframes logoOutlinedIn {
+  0%, 75%  { opacity: 0; }
+  92%, 100% { opacity: 1; }
+}
+
+/* Speed lines — CSS pseudo on the bubble wrap during whoosh phase */
+.hungerai-logo--animated .hungerai-logo__bubble-wrap::before {
+  content: "";
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0.08em;
+  background: linear-gradient(to left, #FF5A1F, transparent);
+  opacity: 0;
+  border-radius: 2px;
+  animation: logoSpeedLines 3.6s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+  pointer-events: none;
+}
+
+@keyframes logoSpeedLines {
+  0%, 55% { width: 0;     opacity: 0;   right: 100%; }
+  65%     { width: 1.2em; opacity: 0.7; right: 100%; }
+  75%     { width: 0;     opacity: 0;   right: 100%; }
+  100%    { width: 0;     opacity: 0; }
+}
+
+/* ── Landing page specific layout helpers ── */
+.hungerai-landing .feature-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--hai-accent-primary-light);
+  color: var(--hai-accent-primary);
+  border-radius: var(--hai-radius-md);
+  margin-bottom: 16px;
+}
+
+.hungerai-landing .step-connector {
+  position: absolute;
+  top: 28px;
+  left: calc(50% + 28px);
+  right: calc(-50% + 28px);
+  height: 2px;
+  background: var(--hai-border);
+}
+
+@media (min-width: 768px) {
+  .hungerai-landing .step-connector {
+    display: block;
+  }
+}
+

@@ -15,12 +15,16 @@ export default function HungerAILandingPage() {
     <div className="min-h-screen bg-[var(--hai-bg-primary)] text-[var(--hai-text-primary)]">
       {/* Hero Section */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[var(--hai-accent-primary)] to-[#ff7043] opacity-5" />
+        {/* <div className="absolute inset-0 bg-gradient-to-br from-[var(--hai-accent-primary)] to-[#ff7043] opacity-5" /> */}
         <div className="relative max-w-5xl mx-auto px-6 py-20 md:py-32">
           <div className="text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--hai-accent-primary-light)] text-[var(--hai-accent-primary)] text-sm font-semibold mb-6">
-              🍔 WhatsApp Ordering for Restaurants
-            </div>
+            {/* HungerAI Logo */}
+            <img
+              src="/branding/hungerai-logo.png"
+              alt="HungerAI Logo"
+              className="mx-auto mb-8 max-h-24 md:max-h-32 w-auto"
+              draggable="false"
+            />
             <h1 className="font-display text-4xl md:text-6xl font-bold leading-tight mb-6">
               Your Menu.
               <br />
@@ -219,14 +223,13 @@ export default function HungerAILandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-[var(--hai-border)] py-8">
+      <footer className="border-t border-[var(--hai-border)] py-8 bg-white">
         <div className="max-w-5xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="text-2xl">🍔</span>
-            <span className="font-display font-bold text-lg">HungerAI</span>
+            <img src="/branding/hungerai-logo.png" alt="HungerAI Logo" className="h-7 w-auto" draggable="false" />
           </div>
           <p className="text-sm text-[var(--hai-text-muted)]">
-            A product of{" "}
+            A product of{' '}
             <Link
               href="/"
               className="text-[var(--hai-accent-primary)] hover:underline"
