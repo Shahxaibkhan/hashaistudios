@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import PricingSection from "@/components/hungerai/PricingSection";
 
 export const metadata: Metadata = {
   title: "HungerAI – WhatsApp Food Ordering for Restaurants",
@@ -158,6 +159,9 @@ export default function HungerAILandingPage() {
           </div>
         </div>
       </section>
+
+      {/* ── PRICING ── */}
+      <PricingSection />
 
       {/* ── CTA ── */}
       <section className="py-20 md:py-28" style={{ background: "#111827" }}>
