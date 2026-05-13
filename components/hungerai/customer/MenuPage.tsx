@@ -8,12 +8,23 @@ import CategoryTabs from "./CategoryTabs";
 import ItemCard from "./ItemCard";
 import ItemSheet from "./ItemSheet";
 import CartButton from "./CartButton";
+import HungerAISplash from "./HungerAISplash";
 
 interface MenuPageProps {
   restaurant: RestaurantWithMenu;
 }
 
+// Convert "14:30" → "2:30 PM"
+function formatTime(time: string): string {
+  const [h, m] = time.split(":").map(Number);
+  const ampm = h >= 12 ? "PM" : "AM";
+  const hour = h % 12 || 12;
+  return `${hour}:${String(m).padStart(2, "0")} ${ampm}`;
+}
+
 export default function MenuPage({ restaurant }: MenuPageProps) {
+  // Splash screen shown on every restaurant page load
+  
   const [activeCategory, setActiveCategory] = useState<string | null>(
     restaurant.categories[0]?.id || null
   );
@@ -77,6 +88,7 @@ export default function MenuPage({ restaurant }: MenuPageProps) {
 
   return (
     <div className="min-h-screen pb-32">
+      <HungerAISplash />
       {/* Header */}
       <header className="sticky top-0 z-30 bg-[var(--hai-bg-primary)] border-b border-[var(--hai-border-subtle)]">
         <div className="px-4 py-4">
@@ -103,7 +115,17 @@ export default function MenuPage({ restaurant }: MenuPageProps) {
                 ) : (
                   <span className="hai-badge hai-badge-red">Closed</span>
                 )}
+                {restaurant.opening_time && restaurant.closing_time && (
+                  <span className="text-xs text-[var(--hai-text-muted)]">
+                    {formatTime(restaurant.opening_time)} – {formatTime(restaurant.closing_time)}
+                  </span>
+                )}
               </div>
+            </div>
+            {/* HungerAI branding */}
+            <div className="flex flex-col items-center gap-0.5 ml-2">
+              <span style={{ fontSize: "9px", color: "#94a3b8", letterSpacing: "0.1em", fontWeight: 600, textTransform: "uppercase" }}>Powered by</span>
+              <img src="/branding/hungerai-logo.png" alt="HungerAI" style={{ height: "22px", width: "auto" }} draggable={false} />
             </div>
           </div>
         </div>
@@ -112,7 +134,10 @@ export default function MenuPage({ restaurant }: MenuPageProps) {
         {!restaurant.is_open && (
           <div className="px-4 pb-3">
             <div className="hai-closed-banner">
-              🚫 We&apos;re currently closed. Check back later!
+              🚫 We&apos;re currently closed.
+              {restaurant.opening_time
+                ? ` Opens at ${formatTime(restaurant.opening_time)}.`
+                : " Check back later!"}
             </div>
           </div>
         )}

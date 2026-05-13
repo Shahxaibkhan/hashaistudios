@@ -14,8 +14,13 @@ export interface Restaurant {
   city_lat: number; // default map center latitude
   city_lng: number; // default map center longitude
   is_open: boolean;
+  opening_time: string | null; // e.g. "09:00" (24h, PKT)
+  closing_time: string | null; // e.g. "23:00" (24h, PKT)
   owner_email: string | null;
   online_payment_details: string | null; // bank/JazzCash details
+  subscription_status: "trial" | "active" | "expired" | "suspended";
+  subscription_plan: "starter" | "boost" | "pro" | null;
+  subscription_expires_at: string | null; // ISO timestamp
   created_at: string;
 }
 

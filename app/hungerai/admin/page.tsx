@@ -7,12 +7,16 @@ import type { Restaurant } from "@/types/hungerai";
 
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL || "";
 
+type SubStatus = "trial" | "active" | "expired" | "suspended";
+type SubPlan = "starter" | "boost" | "pro";
+
 export default function AdminPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [subModal, setSubModal] = useState<Restaurant | null>(null);
 
   useEffect(() => {
     const checkAdmin = async () => {
@@ -121,6 +125,12 @@ export default function AdminPage() {
                   Status
                 </th>
                 <th className="text-left px-4 py-3 text-sm font-medium text-[var(--hai-text-muted)]">
+                  Subscription
+                </th>
+                <th className="text-left px-4 py-3 text-sm font-medium text-[var(--hai-text-muted)]">
+                  Expires
+                </th>
+                <th className="text-left px-4 py-3 text-sm font-medium text-[var(--hai-text-muted)]">
                   Actions
                 </th>
               </tr>
@@ -160,13 +170,49 @@ export default function AdminPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <a
-                      href={`/hungerai/${restaurant.slug}`}
-                      target="_blank"
-                      className="text-sm text-[var(--hai-accent-green)] hover:underline"
-                    >
-                      View Menu
-                    </a>
+                    {(() => {
+                      const s = (restaurant as any).subscription_status as SubStatus | undefined;
+                      const colors: Record<string, string> = {
+                        trial: "bg-blue-500/20 text-blue-400",
+                        active: "bg-[var(--hai-accent-green)]/20 text-[var(--hai-accent-green)]",
+                        expired: "bg-[var(--hai-accent-red)]/20 text-[var(--hai-accent-red)]",
+                        suspended: "bg-yellow-500/20 text-yellow-400",
+                      };
+                      const label = s ? s.charAt(0).toUpperCase() + s.slice(1) : "Trial";
+                      return (
+                        <span className={`px-2 py-1 rounded-full text-xs ${colors[s || "trial"]}`}>
+                          {label}
+                        </span>
+                      );
+                    })()}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-[var(--hai-text-muted)]">
+                    {(() => {
+                      const plan = (restaurant as any).subscription_plan as SubPlan | null;
+                      const exp = (restaurant as any).subscription_expires_at as string | null;
+                      if (!plan) return "—";
+                      const planLabel = { starter: "Starter", boost: "Boost", pro: "Pro" }[plan];
+                      if (!exp) return planLabel;
+                      const days = Math.ceil((new Date(exp).getTime() - Date.now()) / 86400000);
+                      return `${planLabel} · ${days > 0 ? `${days}d left` : "Expired"}`;
+                    })()}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <a
+                        href={`/hungerai/${restaurant.slug}`}
+                        target="_blank"
+                        className="text-sm text-[var(--hai-accent-green)] hover:underline"
+                      >
+                        View Menu
+                      </a>
+                      <button
+                        onClick={() => setSubModal(restaurant)}
+                        className="text-sm text-[var(--hai-text-muted)] hover:text-white underline"
+                      >
+                        Subscription
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -181,6 +227,18 @@ export default function AdminPage() {
           onClose={() => setShowAddModal(false)}
           onSave={() => {
             setShowAddModal(false);
+            window.location.reload();
+          }}
+        />
+      )}
+
+      {/* Subscription Modal */}
+      {subModal && (
+        <SubscriptionModal
+          restaurant={subModal}
+          onClose={() => setSubModal(null)}
+          onSave={() => {
+            setSubModal(null);
             window.location.reload();
           }}
         />
@@ -404,6 +462,165 @@ function AddRestaurantModal({
             className="hai-btn hai-btn-primary flex-1"
           >
             {saving ? "Creating..." : "Create Restaurant"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Subscription Modal
+// ---------------------------------------------------------------------------
+const PLANS: { value: SubPlan; label: string; monthly: string }[] = [
+  { value: "starter", label: "Starter", monthly: "Rs. 3,999/mo" },
+  { value: "boost",   label: "Boost",   monthly: "Rs. 4,999/mo" },
+  { value: "pro",     label: "Pro",     monthly: "Rs. 6,999/mo" },
+];
+
+const DURATIONS: { label: string; months: number }[] = [
+  { label: "1 Month",  months: 1 },
+  { label: "3 Months", months: 3 },
+  { label: "6 Months", months: 6 },
+  { label: "1 Year",   months: 12 },
+];
+
+function SubscriptionModal({
+  restaurant,
+  onClose,
+  onSave,
+}: {
+  restaurant: Restaurant;
+  onClose: () => void;
+  onSave: () => void;
+}) {
+  const r = restaurant as any;
+  const [plan, setPlan] = useState<SubPlan>(r.subscription_plan || "starter");
+  const [months, setMonths] = useState(1);
+  const [status, setStatus] = useState<SubStatus>(r.subscription_status || "trial");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const expiresAt = r.subscription_expires_at
+    ? new Date(r.subscription_expires_at).toLocaleDateString("en-PK", { day: "numeric", month: "short", year: "numeric" })
+    : null;
+
+  const handleSave = async () => {
+    setSaving(true);
+    setError(null);
+    const supabase = createBrowserSupabaseClient();
+
+    // Compute new expiry: extend from today or from existing expiry (whichever is later)
+    const base = r.subscription_expires_at && new Date(r.subscription_expires_at) > new Date()
+      ? new Date(r.subscription_expires_at)
+      : new Date();
+    const newExpiry = new Date(base);
+    newExpiry.setMonth(newExpiry.getMonth() + months);
+
+    const { error: updateError } = await supabase
+      .from("restaurants")
+      .update({
+        subscription_status: status === "trial" || status === "suspended" ? status : "active",
+        subscription_plan: status === "trial" || status === "suspended" ? null : plan,
+        subscription_expires_at: status === "active" ? newExpiry.toISOString() : null,
+      })
+      .eq("id", restaurant.id);
+
+    if (updateError) {
+      setError(updateError.message);
+      setSaving(false);
+      return;
+    }
+    onSave();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/70" onClick={onClose} />
+      <div className="relative bg-[var(--hai-bg-secondary)] rounded-2xl p-6 w-full max-w-sm">
+        <h2 className="font-display text-lg font-bold mb-1">Subscription</h2>
+        <p className="text-sm text-[var(--hai-text-muted)] mb-4">{restaurant.name}</p>
+
+        {expiresAt && (
+          <div className="hai-card p-3 mb-4 text-sm text-center">
+            Current expiry: <strong>{expiresAt}</strong>
+          </div>
+        )}
+
+        {error && (
+          <div className="hai-closed-banner mb-4 text-sm">⚠️ {error}</div>
+        )}
+
+        {/* Status */}
+        <div className="mb-4">
+          <label className="block text-sm text-[var(--hai-text-muted)] mb-2">Status</label>
+          <div className="grid grid-cols-2 gap-2">
+            {(["trial", "active", "expired", "suspended"] as SubStatus[]).map((s) => (
+              <button
+                key={s}
+                onClick={() => setStatus(s)}
+                className={`px-3 py-2 rounded-lg text-sm capitalize border transition-colors ${
+                  status === s
+                    ? "border-[var(--hai-accent-primary)] bg-[var(--hai-accent-primary)]/10 text-[var(--hai-accent-primary)]"
+                    : "border-[var(--hai-border-subtle)] text-[var(--hai-text-muted)]"
+                }`}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Plan — only when activating */}
+        {status === "active" && (
+          <>
+            <div className="mb-4">
+              <label className="block text-sm text-[var(--hai-text-muted)] mb-2">Plan</label>
+              <div className="grid grid-cols-3 gap-2">
+                {PLANS.map((p) => (
+                  <button
+                    key={p.value}
+                    onClick={() => setPlan(p.value)}
+                    className={`px-3 py-2 rounded-lg text-sm border transition-colors ${
+                      plan === p.value
+                        ? "border-[var(--hai-accent-primary)] bg-[var(--hai-accent-primary)]/10 text-[var(--hai-accent-primary)]"
+                        : "border-[var(--hai-border-subtle)] text-[var(--hai-text-muted)]"
+                    }`}
+                  >
+                    <div className="font-semibold">{p.label}</div>
+                    <div style={{ fontSize: 10 }}>{p.monthly}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm text-[var(--hai-text-muted)] mb-2">Add Duration</label>
+              <div className="grid grid-cols-2 gap-2">
+                {DURATIONS.map((d) => (
+                  <button
+                    key={d.months}
+                    onClick={() => setMonths(d.months)}
+                    className={`px-3 py-2 rounded-lg text-sm border transition-colors ${
+                      months === d.months
+                        ? "border-[var(--hai-accent-primary)] bg-[var(--hai-accent-primary)]/10 text-[var(--hai-accent-primary)]"
+                        : "border-[var(--hai-border-subtle)] text-[var(--hai-text-muted)]"
+                    }`}
+                  >
+                    {d.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+
+        <div className="flex gap-2 mt-6">
+          <button onClick={onClose} className="hai-btn hai-btn-secondary flex-1">
+            Cancel
+          </button>
+          <button onClick={handleSave} disabled={saving} className="hai-btn hai-btn-primary flex-1">
+            {saving ? "Saving..." : "Save"}
           </button>
         </div>
       </div>
