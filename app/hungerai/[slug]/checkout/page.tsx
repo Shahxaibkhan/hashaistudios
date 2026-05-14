@@ -171,9 +171,10 @@ export default function CheckoutPage() {
         throw new Error("Failed to create order");
       }
 
-      const { order_number } = await response.json();
+      const { order_number, id: orderId } = await response.json();
 
       // Build WhatsApp link
+      const receiptUrl = `https://hashaistudios.com/hungerai/${slug}/order/${orderId}`;
       const waUrl = buildWaLink({
         orderNumber: order_number,
         restaurantWhatsApp: restaurant.whatsapp_number,
@@ -189,6 +190,7 @@ export default function CheckoutPage() {
         taxRate,
         total,
         paymentMethod,
+        receiptUrl,
       });
 
       // Clear cart

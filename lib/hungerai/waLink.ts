@@ -25,6 +25,7 @@ export interface WaLinkParams {
   taxRate: number;
   total: number;
   paymentMethod: "cod" | "online";
+  receiptUrl?: string; // Optional link to the order receipt page
 }
 
 /**
@@ -90,6 +91,7 @@ export function buildOrderMessage(params: WaLinkParams): string {
     taxRate,
     total,
     paymentMethod,
+    receiptUrl,
   } = params;
 
   const itemLines = items.map(formatItemLine).join("\n");
@@ -120,7 +122,7 @@ ${line}
 
 📍 ${deliveryAddress || "Not provided"}
 ${mapsLink ? mapsLink : ""}
-${line}`;
+${line}${receiptUrl ? `\n🧾 View receipt: ${receiptUrl}` : ""}`;
 
   return message;
 }
