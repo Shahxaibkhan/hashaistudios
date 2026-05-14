@@ -25,7 +25,11 @@ export interface WaLinkParams {
   taxRate: number;
   total: number;
   paymentMethod: "cod" | "online" | "card";
-  receiptUrl?: string; // Optional link to the order receipt page
+  orderType: "delivery" | "pickup";
+  restaurantAddress: string | null; // for pickup: restaurant's text address
+  restaurantLat: number;            // for pickup: restaurant's map pin
+  restaurantLng: number;
+  receiptUrl?: string;
 }
 
 /**
@@ -91,6 +95,10 @@ export function buildOrderMessage(params: WaLinkParams): string {
     taxRate,
     total,
     paymentMethod,
+    orderType,
+    restaurantAddress,
+    restaurantLat,
+    restaurantLng,
     receiptUrl,
   } = params;
 
@@ -99,13 +107,20 @@ export function buildOrderMessage(params: WaLinkParams): string {
   const paymentDisplay =
     paymentMethod === "cod" ? "COD" : paymentMethod === "card" ? "Card on Delivery" : "Online";
 
-  // Build Google Maps link
-  const mapsLink =
-    deliveryLat && deliveryLng
-      ? `https://maps.google.com/?q=${deliveryLat},${deliveryLng}`
-      : null;
-
   const line = "━━━━━━━━━━━━━━━━";
+
+  // Build location block based on order type
+  let locationBlock: string;
+  if (orderType === "pickup") {
+    const restaurantMapsLink = `https://maps.google.com/?q=${restaurantLat},${restaurantLng}`;
+    locationBlock = `🏃 *Pickup order* — ready in ~30–40 min\n📍 Pick up from: ${restaurantAddress || "our location"}\n${restaurantMapsLink}`;
+  } else {
+    const customerMapsLink =
+      deliveryLat && deliveryLng
+        ? `https://maps.google.com/?q=${deliveryLat},${deliveryLng}`
+        : null;
+    locationBlock = `📍 ${deliveryAddress || "Not provided"}\n${customerMapsLink ?? ""}`;
+  }
 
   const message = `${line}
 🍔 *ORDER #${orderNumber}*
@@ -120,8 +135,7 @@ ${line}
 👤 ${customerName}
 📱 ${formatPhoneForDisplay(customerWhatsApp)}
 
-📍 ${deliveryAddress || "Not provided"}
-${mapsLink ? mapsLink : ""}
+${locationBlock}
 ${line}${receiptUrl ? `\n🧾 View receipt: ${receiptUrl}` : ""}`;
 
   return message;

@@ -10,6 +10,7 @@ import type { Restaurant, OrderItem, OrderPayload } from "@/types/hungerai";
 import CartReview from "@/components/hungerai/checkout/CartReview";
 import CustomerForm from "@/components/hungerai/checkout/CustomerForm";
 import DeliveryMap from "@/components/hungerai/checkout/DeliveryMap";
+import OrderTypeToggle from "@/components/hungerai/checkout/OrderTypeToggle";
 import PaymentSelector from "@/components/hungerai/checkout/PaymentSelector";
 import OrderSummary from "@/components/hungerai/checkout/OrderSummary";
 
@@ -29,6 +30,7 @@ export default function CheckoutPage() {
   const [deliveryLng, setDeliveryLng] = useState<number | null>(null);
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"cod" | "online" | "card">("cod");
+  const [orderType, setOrderType] = useState<"delivery" | "pickup">("delivery");
 
   // Validation errors
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -63,6 +65,10 @@ export default function CheckoutPage() {
       setRestaurant(data as Restaurant);
       setDeliveryLat(data.city_lat);
       setDeliveryLng(data.city_lng);
+      // Default order type: pickup-only restaurants start on pickup
+      if (!data.delivery_enabled && data.pickup_enabled) {
+        setOrderType("pickup");
+      }
       setLoading(false);
     };
 
@@ -91,10 +97,12 @@ export default function CheckoutPage() {
     } else if (!/^\d{10}$/.test(customerWhatsApp.replace(/\D/g, ""))) {
       newErrors.whatsapp = "Enter a valid 10-digit number";
     }
-    if (!deliveryAddress.trim()) newErrors.address = "Please enter your delivery address";
-    if (!deliveryLat || !deliveryLng) newErrors.location = "Please set your delivery location on the map";
+    if (orderType === "delivery") {
+      if (!deliveryAddress.trim()) newErrors.address = "Please enter your delivery address";
+      if (!deliveryLat || !deliveryLng) newErrors.location = "Please set your delivery location on the map";
+    }
     setErrors(newErrors);
-  }, [submitAttempted, customerName, customerWhatsApp, deliveryAddress, deliveryLat, deliveryLng]);
+  }, [submitAttempted, customerName, customerWhatsApp, deliveryAddress, deliveryLat, deliveryLng, orderType]);
 
   if (loading || !restaurant || !slug || cartItems.length === 0) {
     return (
@@ -128,8 +136,10 @@ export default function CheckoutPage() {
     } else if (!/^\d{10}$/.test(customerWhatsApp.replace(/\D/g, ""))) {
       newErrors.whatsapp = "Enter a valid 10-digit number";
     }
-    if (!deliveryAddress.trim()) newErrors.address = "Please enter your delivery address";
-    if (!deliveryLat || !deliveryLng) newErrors.location = "Please set your delivery location on the map";
+    if (orderType === "delivery") {
+      if (!deliveryAddress.trim()) newErrors.address = "Please enter your delivery address";
+      if (!deliveryLat || !deliveryLng) newErrors.location = "Please set your delivery location on the map";
+    }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -169,13 +179,14 @@ export default function CheckoutPage() {
         customer_whatsapp: formattedWhatsApp,
         items: orderItems,
         subtotal,
-        delivery_fee: deliveryFee,
+        delivery_fee: orderType === "pickup" ? 0 : deliveryFee,
         tax_amount: taxAmount,
         total,
-        delivery_lat: deliveryLat,
-        delivery_lng: deliveryLng,
-        delivery_address: deliveryAddress,
+        delivery_lat: orderType === "delivery" ? deliveryLat : null,
+        delivery_lng: orderType === "delivery" ? deliveryLng : null,
+        delivery_address: orderType === "delivery" ? deliveryAddress : "",
         payment_method: paymentMethod,
+        order_type: orderType,
       };
 
       // POST to API
@@ -199,15 +210,19 @@ export default function CheckoutPage() {
         items: orderItems,
         customerName,
         customerWhatsApp: formattedWhatsApp,
-        deliveryLat,
-        deliveryLng,
-        deliveryAddress,
+        deliveryLat: orderType === "delivery" ? deliveryLat : null,
+        deliveryLng: orderType === "delivery" ? deliveryLng : null,
+        deliveryAddress: orderType === "delivery" ? deliveryAddress : "",
         subtotal,
         deliveryFee,
         taxAmount,
         taxRate,
         total,
         paymentMethod,
+        orderType,
+        restaurantAddress: restaurant.pickup_address,
+        restaurantLat: restaurant.city_lat,
+        restaurantLng: restaurant.city_lng,
         receiptUrl,
       });
 
@@ -251,6 +266,14 @@ export default function CheckoutPage() {
           </div>
         )}
 
+        {/* Order Type Toggle — only when both delivery & pickup are enabled */}
+        {restaurant.delivery_enabled && restaurant.pickup_enabled && (
+          <section>
+            <h2 className="font-display text-lg font-bold mb-3">Order Type</h2>
+            <OrderTypeToggle selected={orderType} onSelect={setOrderType} />
+          </section>
+        )}
+
         {/* Cart Review */}
         <section>
           <h2 className="font-display text-lg font-bold mb-3">Your Order</h2>
@@ -282,7 +305,8 @@ export default function CheckoutPage() {
           />
         </section>
 
-        {/* Delivery Location */}
+        {/* Delivery Location — only for delivery orders */}
+        {orderType === "delivery" && (
         <section>
           <h2 className="font-display text-lg font-bold mb-3 flex items-center gap-2">
             Delivery Location
@@ -336,6 +360,41 @@ export default function CheckoutPage() {
             <p className="text-[var(--hai-accent-red)] text-sm mt-2">{errors.location}</p>
           )}
         </section>
+        )}
+
+        {/* Pickup Info — only for pickup orders */}
+        {orderType === "pickup" && (
+          <section>
+            <div className="hai-card p-4 space-y-3">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">⏱️</span>
+                <div>
+                  <p className="font-semibold text-[var(--hai-text-primary)]">Ready in 30–40 min</p>
+                  <p className="text-sm text-[var(--hai-text-muted)]">We'll confirm the exact time via WhatsApp</p>
+                </div>
+              </div>
+              {(restaurant.pickup_address || restaurant.city_lat) && (
+                <div className="border-t border-[var(--hai-border-subtle)] pt-3 flex items-start gap-3">
+                  <span className="text-xl">📍</span>
+                  <div>
+                    <p className="text-sm font-medium text-[var(--hai-text-primary)] mb-1">Pickup Location</p>
+                    {restaurant.pickup_address && (
+                      <p className="text-sm text-[var(--hai-text-secondary)]">{restaurant.pickup_address}</p>
+                    )}
+                    <a
+                      href={`https://maps.google.com/?q=${restaurant.city_lat},${restaurant.city_lng}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-xs text-[var(--hai-accent-primary)] font-medium mt-1 hover:underline"
+                    >
+                      🗺️ View on Google Maps
+                    </a>
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
 
         {/* Payment Method */}
         <section>
@@ -358,8 +417,9 @@ export default function CheckoutPage() {
             total={total}
             onPlaceOrder={handlePlaceOrder}
             isSubmitting={submitting}
-            isDisabled={!deliveryLat || !deliveryLng}
+            isDisabled={orderType === "delivery" && (!deliveryLat || !deliveryLng)}
             validationErrors={errors}
+            orderType={orderType}
           />
         </section>
       </main>

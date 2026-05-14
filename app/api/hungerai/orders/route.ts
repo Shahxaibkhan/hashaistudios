@@ -78,6 +78,7 @@ export async function POST(request: NextRequest) {
         delivery_lng: body.delivery_lng,
         delivery_address: body.delivery_address,
         payment_method: body.payment_method,
+        order_type: body.order_type ?? "delivery",
         wa_sent: true,
         ...(clientIp !== "unknown" && { client_ip: clientIp }),
       })

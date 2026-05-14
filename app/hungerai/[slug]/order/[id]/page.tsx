@@ -26,7 +26,7 @@ export default async function OrderReceiptPage({ params }: ReceiptPageProps) {
       .single(),
     supabase
       .from("restaurants")
-      .select("id, name, logo_url, slug")
+      .select("id, name, logo_url, slug, city_lat, city_lng, pickup_address")
       .eq("slug", slug)
       .single(),
   ]);
@@ -44,6 +44,8 @@ export default async function OrderReceiptPage({ params }: ReceiptPageProps) {
   const paymentLabel =
     order.payment_method === "cod" ? "Cash on Delivery" :
     order.payment_method === "card" ? "Card on Delivery" : "Online Payment";
+
+  const isPickup = (order as any).order_type === "pickup";
 
   const orderedAt = new Date(order.created_at).toLocaleString("en-PK", {
     dateStyle: "medium",
@@ -135,13 +137,41 @@ export default async function OrderReceiptPage({ params }: ReceiptPageProps) {
             <span>📱</span>
             <span>{formatPhoneForDisplay(order.customer_whatsapp)}</span>
           </div>
-          {order.delivery_address && (
+
+          {/* Pickup info */}
+          {isPickup && (
+            <div className="mt-3 pt-3 border-t border-[var(--hai-border-subtle)] space-y-2">
+              <div className="flex items-center gap-2">
+                <span>🏃</span>
+                <span className="font-semibold text-[var(--hai-text-primary)]">Pickup · Est. 30–40 min</span>
+              </div>
+              {(restaurant as any).pickup_address && (
+                <div className="flex items-start gap-2 text-[var(--hai-text-primary)]">
+                  <span>📍</span>
+                  <span>{(restaurant as any).pickup_address}</span>
+                </div>
+              )}
+              {(restaurant as any).city_lat && (
+                <a
+                  href={`https://maps.google.com/?q=${(restaurant as any).city_lat},${(restaurant as any).city_lng}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-[var(--hai-accent-primary)] text-xs font-medium hover:underline"
+                >
+                  🗺️ View pickup location on Maps
+                </a>
+              )}
+            </div>
+          )}
+
+          {/* Delivery info */}
+          {!isPickup && order.delivery_address && (
             <div className="flex items-start gap-2 text-[var(--hai-text-primary)]">
               <span>📍</span>
               <span>{order.delivery_address}</span>
             </div>
           )}
-          {mapsLink && (
+          {!isPickup && mapsLink && (
             <a
               href={mapsLink}
               target="_blank"

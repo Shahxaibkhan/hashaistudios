@@ -10,6 +10,7 @@ interface OrderSummaryProps {
   isSubmitting: boolean;
   isDisabled: boolean;
   validationErrors?: Record<string, string>;
+  orderType?: "delivery" | "pickup";
 }
 
 const ERROR_LABELS: Record<string, string> = {
@@ -29,6 +30,7 @@ export default function OrderSummary({
   isSubmitting,
   isDisabled,
   validationErrors = {},
+  orderType = "delivery",
 }: OrderSummaryProps) {
   const errorKeys = Object.keys(validationErrors);
 
@@ -46,14 +48,16 @@ export default function OrderSummary({
             <span>Rs {taxAmount.toLocaleString("en-PK")}</span>
           </div>
         )}
-        <div className="flex items-center justify-between text-[var(--hai-text-muted)] text-sm">
-          <span>Delivery Fee</span>
-          <span>To be confirmed</span>
-        </div>
+        {orderType === "delivery" && (
+          <div className="flex items-center justify-between text-[var(--hai-text-muted)] text-sm">
+            <span>Delivery Fee</span>
+            <span>To be confirmed</span>
+          </div>
+        )}
         <div className="h-px bg-[var(--hai-border)]" />
         <div className="flex items-center justify-between text-lg font-bold text-[var(--hai-text-primary)]">
           <span>Total</span>
-          <span>Rs {total.toLocaleString("en-PK")}+</span>
+          <span>Rs {total.toLocaleString("en-PK")}{orderType === "delivery" ? "+" : ""}</span>
         </div>
       </div>
 
