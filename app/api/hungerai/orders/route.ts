@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
         items: body.items as any, // JSONB
         subtotal: body.subtotal,
         delivery_fee: body.delivery_fee,
-        ...(body.tax_amount !== undefined && { tax_amount: body.tax_amount }),
+        ...(body.tax_amount > 0 && { tax_amount: body.tax_amount }),
         total: body.total,
         delivery_lat: body.delivery_lat,
         delivery_lng: body.delivery_lng,
