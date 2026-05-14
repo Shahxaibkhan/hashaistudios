@@ -89,8 +89,8 @@ export default function CheckoutPage() {
   // Tax calculation
   const taxRate = restaurant.tax_enabled
     ? paymentMethod === "cod"
-      ? restaurant.tax_cod_percent
-      : restaurant.tax_online_percent
+      ? (restaurant.tax_cod_percent ?? 16)
+      : (restaurant.tax_online_percent ?? 5)
     : 0;
   const taxAmount = taxRate > 0 ? Math.round(subtotal * taxRate / 100) : 0;
   const total = subtotal + taxAmount; // Delivery confirmed separately

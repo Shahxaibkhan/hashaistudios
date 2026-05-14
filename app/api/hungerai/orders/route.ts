@@ -41,20 +41,24 @@ export async function POST(request: NextRequest) {
 
     // Rate limiting: check recent orders from this IP
     if (clientIp !== "unknown") {
-      const windowStart = new Date(
-        Date.now() - RATE_LIMIT_WINDOW_MINUTES * 60 * 1000
-      ).toISOString();
-      const { count } = await supabase
-        .from("orders")
-        .select("*", { count: "exact", head: true })
-        .eq("client_ip", clientIp)
-        .gte("created_at", windowStart);
+      try {
+        const windowStart = new Date(
+          Date.now() - RATE_LIMIT_WINDOW_MINUTES * 60 * 1000
+        ).toISOString();
+        const { count } = await supabase
+          .from("orders")
+          .select("*", { count: "exact", head: true })
+          .eq("client_ip", clientIp)
+          .gte("created_at", windowStart);
 
-      if ((count ?? 0) >= RATE_LIMIT_MAX) {
-        return NextResponse.json(
-          { error: "Too many orders. Please wait a few minutes before trying again." },
-          { status: 429 }
-        );
+        if ((count ?? 0) >= RATE_LIMIT_MAX) {
+          return NextResponse.json(
+            { error: "Too many orders. Please wait a few minutes before trying again." },
+            { status: 429 }
+          );
+        }
+      } catch {
+        // Rate limit check failed (e.g. column missing) - allow order to proceed
       }
     }
 
@@ -68,14 +72,14 @@ export async function POST(request: NextRequest) {
         items: body.items as any, // JSONB
         subtotal: body.subtotal,
         delivery_fee: body.delivery_fee,
-        tax_amount: body.tax_amount,
+        ...(body.tax_amount !== undefined && { tax_amount: body.tax_amount }),
         total: body.total,
         delivery_lat: body.delivery_lat,
         delivery_lng: body.delivery_lng,
         delivery_address: body.delivery_address,
         payment_method: body.payment_method,
         wa_sent: true,
-        client_ip: clientIp,
+        ...(clientIp !== "unknown" && { client_ip: clientIp }),
       })
       .select("id, order_number")
       .single();
