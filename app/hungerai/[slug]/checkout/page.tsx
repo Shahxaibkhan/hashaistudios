@@ -78,7 +78,6 @@ export default function CheckoutPage() {
   // Compute cart items for the current restaurant
   const cartItems = cartStore.restaurantSlug === slug ? cartStore.items : [];
   const cartSubtotal = cartStore.restaurantSlug === slug ? cartStore.getSubtotal() : 0;
-  const cartItemCount = cartStore.restaurantSlug === slug ? cartStore.getItemCount() : 0;
 
   // Redirect if cart is empty
   useEffect(() => {

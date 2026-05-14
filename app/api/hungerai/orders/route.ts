@@ -133,20 +133,4 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
-  try {
-    // This endpoint requires authentication
-    // For now, return method not allowed
-    // TODO: Implement auth check for dashboard
-    return NextResponse.json(
-      { error: "Authentication required" },
-      { status: 401 }
-    );
-  } catch (error) {
-    console.error("Orders GET error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
-  }
-}
+

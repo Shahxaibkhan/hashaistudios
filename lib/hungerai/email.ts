@@ -32,7 +32,7 @@ interface OrderEmailParams {
   total: number;
   deliveryLat: number | null;
   deliveryLng: number | null;
-  paymentMethod: "cod" | "online";
+  paymentMethod: "cod" | "online" | "card";
 }
 
 /**

@@ -15,21 +15,6 @@ export function createBrowserSupabaseClient(): SupabaseClient {
 }
 
 /**
- * Server client for server components and route handlers
- * Use this in Server Components, Server Actions, and Route Handlers
- */
-export function createServerSupabaseClient(): SupabaseClient {
-  return createServerClient(supabaseUrl, supabaseAnonKey, {
-    cookies: {
-      getAll() {
-        return [];
-      },
-      setAll() {},
-    },
-  });
-}
-
-/**
  * Admin client with service role key
  * Use this only in secure server-side contexts (API routes, server actions)
  * Has full access to all data, bypasses RLS

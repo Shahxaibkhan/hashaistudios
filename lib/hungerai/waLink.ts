@@ -93,7 +93,6 @@ export function buildOrderMessage(params: WaLinkParams): string {
     subtotal,
     taxAmount,
     taxRate,
-    total,
     paymentMethod,
     orderType,
     restaurantAddress,
