@@ -56,6 +56,7 @@ export default function HungerAILandingPage() {
       {/* ── HERO ── */}
       <section className="bg-white">
         <div className="max-w-5xl mx-auto px-6 pt-20 pb-16 md:pt-28 md:pb-20 flex flex-col items-center text-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/branding/hungerai-logo.png"
             alt="HungerAI"
@@ -196,6 +197,7 @@ export default function HungerAILandingPage() {
       {/* ── FOOTER ── */}
       <footer className="bg-white border-t border-[var(--hai-border)] py-8">
         <div className="max-w-5xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/branding/hungerai-logo.png" alt="HungerAI" className="h-8 w-auto" draggable="false" />
           <p className="text-sm text-[var(--hai-text-muted)] text-center">
             &copy; {new Date().getFullYear()} HungerAI &mdash; A product of{" "}

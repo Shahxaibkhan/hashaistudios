@@ -62,6 +62,7 @@ export default function HungerAISplash() {
       </p>
 
       {/* Logo with subtle pulse */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/branding/hungerai-logo.png"
         alt="HungerAI"

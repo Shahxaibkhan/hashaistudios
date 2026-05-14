@@ -125,6 +125,7 @@ export default function MenuPage({ restaurant }: MenuPageProps) {
             {/* HungerAI branding */}
             <div className="flex flex-col items-center gap-0.5 ml-2">
               <span style={{ fontSize: "9px", color: "#94a3b8", letterSpacing: "0.1em", fontWeight: 600, textTransform: "uppercase" }}>Powered by</span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/branding/hungerai-logo.png" alt="HungerAI" style={{ height: "22px", width: "auto" }} draggable={false} />
             </div>
           </div>

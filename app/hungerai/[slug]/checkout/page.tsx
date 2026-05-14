@@ -369,7 +369,7 @@ export default function CheckoutPage() {
                 <span className="text-2xl">⏱️</span>
                 <div>
                   <p className="font-semibold text-[var(--hai-text-primary)]">Ready in 30–40 min</p>
-                  <p className="text-sm text-[var(--hai-text-muted)]">We'll confirm the exact time via WhatsApp</p>
+                  <p className="text-sm text-[var(--hai-text-muted)]">We&apos;ll confirm the exact time via WhatsApp</p>
                 </div>
               </div>
               {(restaurant.pickup_address || restaurant.city_lat) && (

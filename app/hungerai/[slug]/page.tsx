@@ -98,6 +98,7 @@ export default async function RestaurantMenuPage({ params }: PageProps) {
   if (isExpired) {
     return (
       <div className="hungerai min-h-screen flex flex-col items-center justify-center px-6 text-center">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/branding/hungerai-logo.png"
           alt="HungerAI"

@@ -73,6 +73,7 @@ export default function AdminPage() {
     <div className="min-h-screen px-4 py-6 max-w-6xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/branding/hungerai-logo.png" alt="HungerAI" style={{ height: 36, width: "auto" }} draggable={false} />
         <div className="flex items-center gap-3">
           <button

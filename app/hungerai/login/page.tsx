@@ -44,6 +44,7 @@ export default function LoginPage() {
       <div className="w-full max-w-[400px]">
         {/* Logo & Brand */}
         <div className="text-center mb-10">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/branding/hungerai-logo.png"
             alt="HungerAI"

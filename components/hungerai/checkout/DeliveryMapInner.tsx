@@ -128,6 +128,7 @@ export default function DeliveryMapInner({
       mapRef.current = null;
       markerRef.current = null;
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [centerLat, centerLng, onPinChange]); // Don't include pinLat/pinLng to avoid re-init
 
   // Update marker position when pinLat/pinLng change externally
