@@ -42,7 +42,8 @@ export default async function OrderReceiptPage({ params }: ReceiptPageProps) {
       : null;
 
   const paymentLabel =
-    order.payment_method === "cod" ? "Cash on Delivery" : "Online Payment";
+    order.payment_method === "cod" ? "Cash on Delivery" :
+    order.payment_method === "card" ? "Card on Delivery" : "Online Payment";
 
   const orderedAt = new Date(order.created_at).toLocaleString("en-PK", {
     dateStyle: "medium",

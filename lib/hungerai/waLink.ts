@@ -24,7 +24,7 @@ export interface WaLinkParams {
   taxAmount: number;
   taxRate: number;
   total: number;
-  paymentMethod: "cod" | "online";
+  paymentMethod: "cod" | "online" | "card";
   receiptUrl?: string; // Optional link to the order receipt page
 }
 
@@ -97,7 +97,7 @@ export function buildOrderMessage(params: WaLinkParams): string {
   const itemLines = items.map(formatItemLine).join("\n");
 
   const paymentDisplay =
-    paymentMethod === "cod" ? "COD" : "Online";
+    paymentMethod === "cod" ? "COD" : paymentMethod === "card" ? "Card on Delivery" : "Online";
 
   // Build Google Maps link
   const mapsLink =
