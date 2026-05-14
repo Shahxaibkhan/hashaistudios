@@ -28,7 +28,7 @@ export default function CheckoutPage() {
   const [deliveryLat, setDeliveryLat] = useState<number | null>(null);
   const [deliveryLng, setDeliveryLng] = useState<number | null>(null);
   const [deliveryAddress, setDeliveryAddress] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<"cod" | "online">("cod");
+  const [paymentMethod, setPaymentMethod] = useState<"cod" | "online" | "card">("cod");
 
   // Validation errors
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -110,9 +110,9 @@ export default function CheckoutPage() {
 
   // Tax calculation
   const taxRate = restaurant.tax_enabled
-    ? paymentMethod === "cod"
-      ? (restaurant.tax_cod_percent ?? 16)
-      : (restaurant.tax_online_percent ?? 5)
+    ? paymentMethod === "online"
+      ? (restaurant.tax_online_percent ?? 5)
+      : (restaurant.tax_cod_percent ?? 16) // cod & card use the same rate
     : 0;
   const taxAmount = taxRate > 0 ? Math.round(subtotal * taxRate / 100) : 0;
   const total = subtotal + taxAmount; // Delivery confirmed separately
@@ -344,6 +344,7 @@ export default function CheckoutPage() {
             selected={paymentMethod}
             onSelect={setPaymentMethod}
             onlinePaymentDetails={restaurant.online_payment_details}
+            cardOnDeliveryEnabled={restaurant.card_on_delivery_enabled}
           />
         </section>
 

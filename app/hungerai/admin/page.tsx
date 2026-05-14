@@ -292,6 +292,7 @@ function AddRestaurantModal({
     delivery_fee_per_km: "20",
     delivery_radius_km: "10",
     online_payment_details: "",
+    card_on_delivery_enabled: false,
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -318,6 +319,7 @@ function AddRestaurantModal({
       delivery_fee_per_km: parseInt(form.delivery_fee_per_km),
       delivery_radius_km: parseInt(form.delivery_radius_km),
       online_payment_details: form.online_payment_details || null,
+      card_on_delivery_enabled: form.card_on_delivery_enabled,
       is_open: true,
     });
 
@@ -476,6 +478,19 @@ function AddRestaurantModal({
                 setForm({ ...form, online_payment_details: e.target.value })
               }
             />
+          </div>
+
+          <div className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              id="card_on_delivery"
+              checked={form.card_on_delivery_enabled}
+              onChange={(e) => setForm({ ...form, card_on_delivery_enabled: e.target.checked })}
+              className="w-4 h-4 accent-[var(--hai-accent-primary)]"
+            />
+            <label htmlFor="card_on_delivery" className="text-sm text-[var(--hai-text-secondary)] cursor-pointer">
+              Card on Delivery enabled
+            </label>
           </div>
         </div>
 

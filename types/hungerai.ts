@@ -18,6 +18,7 @@ export interface Restaurant {
   closing_time: string | null; // e.g. "23:00" (24h, PKT)
   owner_email: string | null;
   online_payment_details: string | null; // bank/JazzCash details
+  card_on_delivery_enabled: boolean;
   subscription_status: "trial" | "active" | "expired" | "suspended";
   subscription_plan: "starter" | "boost" | "pro" | null;
   subscription_expires_at: string | null; // ISO timestamp
@@ -67,7 +68,7 @@ export interface Order {
   total: number;
   delivery_lat: number | null;
   delivery_lng: number | null;
-  payment_method: "cod" | "online";
+  payment_method: "cod" | "online" | "card";
   wa_sent: boolean;
   created_at: string;
 }
@@ -121,7 +122,7 @@ export interface OrderPayload {
   delivery_lat: number | null;
   delivery_lng: number | null;
   delivery_address: string;
-  payment_method: "cod" | "online";
+  payment_method: "cod" | "online" | "card";
 }
 
 export interface OrderResponse {

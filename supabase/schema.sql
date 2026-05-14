@@ -26,6 +26,7 @@ create table restaurants (
   is_open boolean default true,
   owner_email text,
   online_payment_details text,                  -- bank account, JazzCash number, etc.
+  card_on_delivery_enabled boolean default false,
   created_at timestamptz default now()
 );
 
@@ -72,7 +73,7 @@ create table orders (
   delivery_lat double precision,
   delivery_lng double precision,
   delivery_address text,                        -- house #, street, area, city
-  payment_method text default 'cod',            -- 'cod' or 'online'
+  payment_method text default 'cod',            -- 'cod', 'online', or 'card'
   wa_sent boolean default false,                -- true once customer redirected to WA
   created_at timestamptz default now()
 );
