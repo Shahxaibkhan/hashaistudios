@@ -21,6 +21,8 @@ export interface WaLinkParams {
   deliveryAddress: string;
   subtotal: number;
   deliveryFee: number;
+  taxAmount: number;
+  taxRate: number;
   total: number;
   paymentMethod: "cod" | "online";
 }
@@ -84,7 +86,8 @@ export function buildOrderMessage(params: WaLinkParams): string {
     deliveryLng,
     deliveryAddress,
     subtotal,
-    deliveryFee,
+    taxAmount,
+    taxRate,
     total,
     paymentMethod,
   } = params;
@@ -109,7 +112,7 @@ ${line}
 ${itemLines}
 
 ${line}
-💰 ${formatPrice(subtotal)} · ${paymentDisplay}
+💰 ${formatPrice(subtotal)}${taxAmount > 0 ? ` + ${taxRate}% tax (Rs ${taxAmount})` : ""} · ${paymentDisplay}
 ${line}
 
 👤 ${customerName}

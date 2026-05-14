@@ -3,6 +3,10 @@ import { createAdminSupabaseClient, createSimpleServerClient } from "@/lib/hunge
 import { sendOrderEmail } from "@/lib/hungerai/email";
 import type { OrderPayload, Restaurant } from "@/types/hungerai";
 
+// Rate limit: max 5 orders per IP per 10 minutes
+const RATE_LIMIT_MAX = 5;
+const RATE_LIMIT_WINDOW_MINUTES = 10;
+
 export async function POST(request: NextRequest) {
   try {
     const body: OrderPayload = await request.json();
@@ -21,13 +25,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Get client IP
+    const clientIp =
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      request.headers.get("x-real-ip") ||
+      "unknown";
+
     // Use admin client if available, otherwise fall back to simple client (relies on RLS policy)
     let supabase;
     try {
       supabase = createAdminSupabaseClient();
     } catch {
-      // Fallback to simple client - RLS policy allows public order creation
       supabase = createSimpleServerClient();
+    }
+
+    // Rate limiting: check recent orders from this IP
+    if (clientIp !== "unknown") {
+      const windowStart = new Date(
+        Date.now() - RATE_LIMIT_WINDOW_MINUTES * 60 * 1000
+      ).toISOString();
+      const { count } = await supabase
+        .from("orders")
+        .select("*", { count: "exact", head: true })
+        .eq("client_ip", clientIp)
+        .gte("created_at", windowStart);
+
+      if ((count ?? 0) >= RATE_LIMIT_MAX) {
+        return NextResponse.json(
+          { error: "Too many orders. Please wait a few minutes before trying again." },
+          { status: 429 }
+        );
+      }
     }
 
     // Insert order
@@ -40,12 +68,14 @@ export async function POST(request: NextRequest) {
         items: body.items as any, // JSONB
         subtotal: body.subtotal,
         delivery_fee: body.delivery_fee,
+        tax_amount: body.tax_amount,
         total: body.total,
         delivery_lat: body.delivery_lat,
         delivery_lng: body.delivery_lng,
         delivery_address: body.delivery_address,
         payment_method: body.payment_method,
-        wa_sent: true, // Set to true since we're redirecting to WhatsApp
+        wa_sent: true,
+        client_ip: clientIp,
       })
       .select("id, order_number")
       .single();

@@ -85,7 +85,15 @@ export default function CheckoutPage() {
   // Calculate delivery info
   const deliveryFee = 0; // Owner will confirm delivery fee via WhatsApp
   const subtotal = cartSubtotal;
-  const total = subtotal; // Total is just subtotal, delivery confirmed separately
+
+  // Tax calculation
+  const taxRate = restaurant.tax_enabled
+    ? paymentMethod === "cod"
+      ? restaurant.tax_cod_percent
+      : restaurant.tax_online_percent
+    : 0;
+  const taxAmount = taxRate > 0 ? Math.round(subtotal * taxRate / 100) : 0;
+  const total = subtotal + taxAmount; // Delivery confirmed separately
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -144,6 +152,7 @@ export default function CheckoutPage() {
         items: orderItems,
         subtotal,
         delivery_fee: deliveryFee,
+        tax_amount: taxAmount,
         total,
         delivery_lat: deliveryLat,
         delivery_lng: deliveryLng,
@@ -176,6 +185,8 @@ export default function CheckoutPage() {
         deliveryAddress,
         subtotal,
         deliveryFee,
+        taxAmount,
+        taxRate,
         total,
         paymentMethod,
       });
@@ -297,6 +308,8 @@ export default function CheckoutPage() {
           <OrderSummary
             subtotal={subtotal}
             deliveryFee={deliveryFee}
+            taxAmount={taxAmount}
+            taxRate={taxRate}
             total={total}
             onPlaceOrder={handlePlaceOrder}
             isSubmitting={submitting}

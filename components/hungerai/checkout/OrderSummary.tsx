@@ -3,6 +3,8 @@
 interface OrderSummaryProps {
   subtotal: number;
   deliveryFee: number;
+  taxAmount: number;
+  taxRate: number;
   total: number;
   onPlaceOrder: () => void;
   isSubmitting: boolean;
@@ -12,6 +14,8 @@ interface OrderSummaryProps {
 export default function OrderSummary({
   subtotal,
   deliveryFee,
+  taxAmount,
+  taxRate,
   total,
   onPlaceOrder,
   isSubmitting,
@@ -25,6 +29,12 @@ export default function OrderSummary({
           <span>Subtotal</span>
           <span>Rs {subtotal.toLocaleString("en-PK")}</span>
         </div>
+        {taxAmount > 0 && (
+          <div className="flex items-center justify-between text-[var(--hai-text-muted)] text-sm">
+            <span>Tax ({taxRate}%)</span>
+            <span>Rs {taxAmount.toLocaleString("en-PK")}</span>
+          </div>
+        )}
         <div className="flex items-center justify-between text-[var(--hai-text-muted)] text-sm">
           <span>Delivery Fee</span>
           <span>To be confirmed</span>
@@ -32,7 +42,7 @@ export default function OrderSummary({
         <div className="h-px bg-[var(--hai-border)]" />
         <div className="flex items-center justify-between text-lg font-bold text-[var(--hai-text-primary)]">
           <span>Total</span>
-          <span>Rs {subtotal.toLocaleString("en-PK")}+</span>
+          <span>Rs {total.toLocaleString("en-PK")}+</span>
         </div>
       </div>
 

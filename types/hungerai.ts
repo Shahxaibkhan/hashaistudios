@@ -22,6 +22,10 @@ export interface Restaurant {
   subscription_plan: "starter" | "boost" | "pro" | null;
   subscription_expires_at: string | null; // ISO timestamp
   created_at: string;
+  // Tax configuration
+  tax_enabled: boolean;
+  tax_cod_percent: number;    // e.g. 16 for 16%
+  tax_online_percent: number; // e.g. 5 for 5%
 }
 
 export interface Category {
@@ -112,6 +116,7 @@ export interface OrderPayload {
   items: OrderItem[];
   subtotal: number;
   delivery_fee: number;
+  tax_amount: number;
   total: number;
   delivery_lat: number | null;
   delivery_lng: number | null;
@@ -293,11 +298,13 @@ export interface Database {
           items: Json;
           subtotal: number;
           delivery_fee: number;
+          tax_amount: number;
           total: number;
           delivery_lat: number | null;
           delivery_lng: number | null;
           payment_method: string;
           wa_sent: boolean;
+          client_ip: string | null;
           created_at: string;
         };
         Insert: {
