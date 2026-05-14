@@ -27,6 +27,9 @@ create table restaurants (
   owner_email text,
   online_payment_details text,                  -- bank account, JazzCash number, etc.
   card_on_delivery_enabled boolean default false,
+  pickup_enabled boolean default false,          -- restaurant offers self-pickup
+  delivery_enabled boolean default true,         -- restaurant offers delivery
+  pickup_address text,                           -- restaurant's physical address shown to pickup customers
   created_at timestamptz default now()
 );
 
@@ -74,6 +77,7 @@ create table orders (
   delivery_lng double precision,
   delivery_address text,                        -- house #, street, area, city
   payment_method text default 'cod',            -- 'cod', 'online', or 'card'
+  order_type text default 'delivery',           -- 'delivery' or 'pickup'
   wa_sent boolean default false,                -- true once customer redirected to WA
   created_at timestamptz default now()
 );

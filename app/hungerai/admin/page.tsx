@@ -293,6 +293,9 @@ function AddRestaurantModal({
     delivery_radius_km: "10",
     online_payment_details: "",
     card_on_delivery_enabled: false,
+    pickup_enabled: false,
+    delivery_enabled: true,
+    pickup_address: "",
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -320,6 +323,9 @@ function AddRestaurantModal({
       delivery_radius_km: parseInt(form.delivery_radius_km),
       online_payment_details: form.online_payment_details || null,
       card_on_delivery_enabled: form.card_on_delivery_enabled,
+      pickup_enabled: form.pickup_enabled,
+      delivery_enabled: form.delivery_enabled,
+      pickup_address: form.pickup_address || null,
       is_open: true,
     });
 
@@ -492,6 +498,49 @@ function AddRestaurantModal({
               Card on Delivery enabled
             </label>
           </div>
+
+          <div className="flex gap-6">
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="delivery_enabled"
+                checked={form.delivery_enabled}
+                onChange={(e) => setForm({ ...form, delivery_enabled: e.target.checked })}
+                className="w-4 h-4 accent-[var(--hai-accent-primary)]"
+              />
+              <label htmlFor="delivery_enabled" className="text-sm text-[var(--hai-text-secondary)] cursor-pointer">
+                Delivery enabled
+              </label>
+            </div>
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="pickup_enabled"
+                checked={form.pickup_enabled}
+                onChange={(e) => setForm({ ...form, pickup_enabled: e.target.checked })}
+                className="w-4 h-4 accent-[var(--hai-accent-primary)]"
+              />
+              <label htmlFor="pickup_enabled" className="text-sm text-[var(--hai-text-secondary)] cursor-pointer">
+                Pickup enabled
+              </label>
+            </div>
+          </div>
+
+          {form.pickup_enabled && (
+            <div>
+              <label className="block text-sm text-[var(--hai-text-muted)] mb-1">
+                Pickup Address
+              </label>
+              <input
+                type="text"
+                className="hai-input"
+                placeholder="Shop 4, DHA Phase 5, Lahore"
+                value={form.pickup_address}
+                onChange={(e) => setForm({ ...form, pickup_address: e.target.value })}
+              />
+              <p className="text-xs text-[var(--hai-text-muted)] mt-1">Shown to customers on pickup orders. Map pin uses City Lat/Lng above.</p>
+            </div>
+          )}
         </div>
 
         <div className="flex gap-2 mt-6">

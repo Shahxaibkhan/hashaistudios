@@ -19,6 +19,9 @@ export interface Restaurant {
   owner_email: string | null;
   online_payment_details: string | null; // bank/JazzCash details
   card_on_delivery_enabled: boolean;
+  pickup_enabled: boolean;       // restaurant offers self-pickup
+  delivery_enabled: boolean;     // restaurant offers delivery
+  pickup_address: string | null; // restaurant's address shown to pickup customers
   subscription_status: "trial" | "active" | "expired" | "suspended";
   subscription_plan: "starter" | "boost" | "pro" | null;
   subscription_expires_at: string | null; // ISO timestamp
@@ -69,6 +72,7 @@ export interface Order {
   delivery_lat: number | null;
   delivery_lng: number | null;
   payment_method: "cod" | "online" | "card";
+  order_type: "delivery" | "pickup";
   wa_sent: boolean;
   created_at: string;
 }
@@ -123,6 +127,7 @@ export interface OrderPayload {
   delivery_lng: number | null;
   delivery_address: string;
   payment_method: "cod" | "online" | "card";
+  order_type: "delivery" | "pickup";
 }
 
 export interface OrderResponse {
