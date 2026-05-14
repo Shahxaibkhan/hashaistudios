@@ -9,7 +9,15 @@ interface OrderSummaryProps {
   onPlaceOrder: () => void;
   isSubmitting: boolean;
   isDisabled: boolean;
+  validationErrors?: Record<string, string>;
 }
+
+const ERROR_LABELS: Record<string, string> = {
+  name: "Full Name",
+  whatsapp: "WhatsApp Number",
+  address: "Delivery Address",
+  location: "Delivery Pin",
+};
 
 export default function OrderSummary({
   subtotal,
@@ -20,7 +28,10 @@ export default function OrderSummary({
   onPlaceOrder,
   isSubmitting,
   isDisabled,
+  validationErrors = {},
 }: OrderSummaryProps) {
+  const errorKeys = Object.keys(validationErrors);
+
   return (
     <div className="hai-card p-4">
       {/* Summary Lines */}
@@ -46,9 +57,22 @@ export default function OrderSummary({
         </div>
       </div>
 
+      {/* Validation Error Summary */}
+      {errorKeys.length > 0 && (
+        <div className="hai-closed-banner mt-4 flex items-start gap-2 text-sm">
+          <svg className="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+          </svg>
+          <span>
+            Please complete:{" "}
+            <strong>{errorKeys.map((k) => ERROR_LABELS[k] ?? k).join(", ")}</strong>
+          </span>
+        </div>
+      )}
+
       {/* Place Order Button */}
       <button
-        className={`w-full mt-6 py-4 text-lg font-bold rounded-xl transition-all ${
+        className={`w-full mt-4 py-4 text-lg font-bold rounded-xl transition-all ${
           isDisabled || isSubmitting
             ? "bg-[var(--hai-bg-tertiary)] text-[var(--hai-text-muted)] cursor-not-allowed"
             : "bg-[var(--hai-accent-primary)] text-white hover:bg-[var(--hai-accent-primary-hover)] shadow-lg"

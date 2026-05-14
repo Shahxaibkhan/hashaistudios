@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { useCartStore } from "@/store/hungerai/cartStore";
@@ -32,6 +32,13 @@ export default function CheckoutPage() {
 
   // Validation errors
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitAttempted, setSubmitAttempted] = useState(false);
+
+  // Refs for scroll-to-error
+  const nameRef = useRef<HTMLDivElement>(null);
+  const whatsappRef = useRef<HTMLDivElement>(null);
+  const addressRef = useRef<HTMLDivElement>(null);
+  const locationRef = useRef<HTMLDivElement>(null);
 
   // Cart store - always called unconditionally
   const cartStore = useCartStore();
@@ -74,6 +81,21 @@ export default function CheckoutPage() {
     }
   }, [loading, cartItems.length, slug, router]);
 
+  // Re-validate live after first submit attempt — clears errors as user fixes fields
+  useEffect(() => {
+    if (!submitAttempted) return;
+    const newErrors: Record<string, string> = {};
+    if (!customerName.trim()) newErrors.name = "Name is required";
+    if (!customerWhatsApp.trim()) {
+      newErrors.whatsapp = "WhatsApp number is required";
+    } else if (!/^\d{10}$/.test(customerWhatsApp.replace(/\D/g, ""))) {
+      newErrors.whatsapp = "Enter a valid 10-digit number";
+    }
+    if (!deliveryAddress.trim()) newErrors.address = "Please enter your delivery address";
+    if (!deliveryLat || !deliveryLng) newErrors.location = "Please set your delivery location on the map";
+    setErrors(newErrors);
+  }, [submitAttempted, customerName, customerWhatsApp, deliveryAddress, deliveryLat, deliveryLng]);
+
   if (loading || !restaurant || !slug || cartItems.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -95,33 +117,29 @@ export default function CheckoutPage() {
   const taxAmount = taxRate > 0 ? Math.round(subtotal * taxRate / 100) : 0;
   const total = subtotal + taxAmount; // Delivery confirmed separately
 
-  const validateForm = (): boolean => {
+  const handlePlaceOrder = async () => {
+    setSubmitAttempted(true);
+
+    // Build errors inline for scroll-to-first logic
     const newErrors: Record<string, string> = {};
-
-    if (!customerName.trim()) {
-      newErrors.name = "Name is required";
-    }
-
+    if (!customerName.trim()) newErrors.name = "Name is required";
     if (!customerWhatsApp.trim()) {
       newErrors.whatsapp = "WhatsApp number is required";
     } else if (!/^\d{10}$/.test(customerWhatsApp.replace(/\D/g, ""))) {
       newErrors.whatsapp = "Enter a valid 10-digit number";
     }
+    if (!deliveryAddress.trim()) newErrors.address = "Please enter your delivery address";
+    if (!deliveryLat || !deliveryLng) newErrors.location = "Please set your delivery location on the map";
 
-    if (!deliveryLat || !deliveryLng) {
-      newErrors.location = "Please set your delivery location on the map";
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      const firstRef = newErrors.name ? nameRef
+        : newErrors.whatsapp ? whatsappRef
+        : newErrors.address ? addressRef
+        : locationRef;
+      firstRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
     }
-
-    if (!deliveryAddress.trim()) {
-      newErrors.address = "Please enter your delivery address";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handlePlaceOrder = async () => {
-    if (!validateForm()) return;
 
     setSubmitting(true);
     setError(null);
@@ -244,8 +262,17 @@ export default function CheckoutPage() {
         </section>
 
         {/* Customer Details */}
-        <section>
-          <h2 className="font-display text-lg font-bold mb-3">Your Details</h2>
+        <section ref={nameRef}>
+          <h2 className="font-display text-lg font-bold mb-3 flex items-center gap-2">
+            Your Details
+            {customerName.trim() && customerWhatsApp.trim() ? (
+              <span className="text-xs font-normal px-2 py-0.5 rounded-full bg-[var(--hai-accent-green-light)] text-[var(--hai-accent-green)]">✓ Done</span>
+            ) : submitAttempted ? (
+              <span className="text-xs font-normal px-2 py-0.5 rounded-full bg-[var(--hai-accent-red-light)] text-[var(--hai-accent-red)]">Required</span>
+            ) : (
+              <span className="text-xs font-normal text-[var(--hai-text-muted)]">Fill in below</span>
+            )}
+          </h2>
           <CustomerForm
             name={customerName}
             whatsapp={customerWhatsApp}
@@ -257,10 +284,19 @@ export default function CheckoutPage() {
 
         {/* Delivery Location */}
         <section>
-          <h2 className="font-display text-lg font-bold mb-3">Delivery Location</h2>
+          <h2 className="font-display text-lg font-bold mb-3 flex items-center gap-2">
+            Delivery Location
+            {deliveryAddress.trim() && deliveryLat && deliveryLng ? (
+              <span className="text-xs font-normal px-2 py-0.5 rounded-full bg-[var(--hai-accent-green-light)] text-[var(--hai-accent-green)]">✓ Done</span>
+            ) : submitAttempted ? (
+              <span className="text-xs font-normal px-2 py-0.5 rounded-full bg-[var(--hai-accent-red-light)] text-[var(--hai-accent-red)]">Required</span>
+            ) : (
+              <span className="text-xs font-normal text-[var(--hai-text-muted)]">Fill in below</span>
+            )}
+          </h2>
           
           {/* Address Input */}
-          <div className="hai-card p-4 mb-4">
+          <div className="hai-card p-4 mb-4" ref={addressRef}>
             <label className="block text-sm font-medium text-[var(--hai-text-primary)] mb-2">
               Delivery Address
             </label>
@@ -269,7 +305,11 @@ export default function CheckoutPage() {
               onChange={(e) => setDeliveryAddress(e.target.value)}
               placeholder="House #, Street, Area, City (e.g., House 123, Street 5, Gulberg III, Lahore)"
               rows={3}
-              className="w-full px-4 py-3 rounded-xl border border-[var(--hai-border-subtle)] bg-[var(--hai-bg-primary)] text-[var(--hai-text-primary)] placeholder:text-[var(--hai-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--hai-accent-primary)] focus:border-transparent resize-none text-base"
+              className={`w-full px-4 py-3 rounded-xl border bg-[var(--hai-bg-primary)] text-[var(--hai-text-primary)] placeholder:text-[var(--hai-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--hai-accent-primary)] focus:border-transparent resize-none text-base transition-colors ${
+                errors.address
+                  ? "border-[var(--hai-accent-red)]"
+                  : "border-[var(--hai-border-subtle)]"
+              }`}
             />
             {errors.address && (
               <p className="text-[var(--hai-accent-red)] text-sm mt-2">{errors.address}</p>
@@ -277,16 +317,18 @@ export default function CheckoutPage() {
           </div>
 
           {/* Map */}
-          <DeliveryMap
-            centerLat={restaurant.city_lat}
-            centerLng={restaurant.city_lng}
-            pinLat={deliveryLat}
-            pinLng={deliveryLng}
-            onPinChange={(lat, lng) => {
-              setDeliveryLat(lat);
-              setDeliveryLng(lng);
-            }}
-          />
+          <div ref={locationRef}>
+            <DeliveryMap
+              centerLat={restaurant.city_lat}
+              centerLng={restaurant.city_lng}
+              pinLat={deliveryLat}
+              pinLng={deliveryLng}
+              onPinChange={(lat, lng) => {
+                setDeliveryLat(lat);
+                setDeliveryLng(lng);
+              }}
+            />
+          </div>
           <p className="text-sm text-[var(--hai-text-muted)] mt-2 text-center">
             Delivery fee will be confirmed by the restaurant
           </p>
@@ -316,6 +358,7 @@ export default function CheckoutPage() {
             onPlaceOrder={handlePlaceOrder}
             isSubmitting={submitting}
             isDisabled={!deliveryLat || !deliveryLng}
+            validationErrors={errors}
           />
         </section>
       </main>
