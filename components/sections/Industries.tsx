@@ -3,7 +3,8 @@ const industries = [
   { name: "Sports & Recreation", detail: "Arenas, courts, training centers" },
   { name: "Food & Hospitality", detail: "Restaurant groups, ghost kitchens" },
   { name: "Real Estate", detail: "Brokerages, proptech, developers" },
-  { name: "Financial Services", detail: "Risk, ops, private markets" }
+  { name: "Financial Services", detail: "Risk, ops, private markets" },
+  { name: "Enterprise Enablement", detail: "Workforce AI transformation programs" }
 ];
 
 export function Industries() {

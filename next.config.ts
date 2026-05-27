@@ -13,7 +13,8 @@ const withPWA = require("next-pwa")({
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   experimental: {
-    typedRoutes: true
+    typedRoutes: true,
+    serverComponentsExternalPackages: ['@prisma/client', 'bcryptjs']
   }
 };
 

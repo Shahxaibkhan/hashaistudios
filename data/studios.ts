@@ -114,5 +114,39 @@ export const studios: Studio[] = [
     ],
     customers: ["Enterprise brokerages", "Proptech teams", "Developers"],
     ctaLabel: "Preview EstateAI"
+  },
+  {
+    slug: "enableai",
+    name: "EnableAI",
+    shortDescription: "Enterprise AI enablement and workforce transformation for operational teams.",
+    industry: "Enterprise Enablement",
+    status: "live",
+    heroCopy: "AI workforce enablement for modern organizations.",
+    problem:
+      "Organizations adopt AI tools but lack the operational capability to deploy them effectively across teams and workflows — creating friction instead of efficiency.",
+    solution:
+      "EnableAI delivers role-based, operational AI transformation programs tailored by industry and function, embedded directly within your organization.",
+    features: [
+      "Executive AI Readiness",
+      "AI for Operations Teams",
+      "AI for Sales & Marketing",
+      "AI Workflow Automation",
+      "Industry-Specific AI Programs",
+      "AI for Engineering Teams"
+    ],
+    workflow: [
+      "Operational AI Readiness Assessment across teams and workflows",
+      "Custom program design by role, function, and industry",
+      "Embedded delivery — on-site workshops or remote cohorts"
+    ],
+    customers: [
+      "SMEs",
+      "Enterprise teams",
+      "Operations staff",
+      "Sales teams",
+      "Engineering departments",
+      "Executive leadership"
+    ],
+    ctaLabel: "Book a Consultation"
   }
 ];

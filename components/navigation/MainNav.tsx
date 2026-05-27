@@ -5,10 +5,11 @@ import type { Route } from "next";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
-const links = [
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" }
-] satisfies { href: Route; label: string }[];
+const links: { href: Route; label: string }[] = [
+  { href: "/enableai" as Route, label: "Enablement" },
+  { href: "/about" as Route, label: "About" },
+  { href: "/contact" as Route, label: "Contact" }
+];
 
 export function MainNav() {
   const pathname = usePathname();
