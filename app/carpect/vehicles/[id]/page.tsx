@@ -1,24 +1,22 @@
-import { getServerSession } from 'next-auth'
-import { carpectAuthOptions } from '@/lib/carpect/auth'
-import { carpectPrisma } from '@/lib/carpect/prisma'
+import { createCarpectServerClient } from '@/lib/carpect/supabase'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Car, Plus, ClipboardList } from 'lucide-react'
 import { formatDate } from '@/lib/carpect/utils'
 
 export default async function CarPectVehicleDetailPage({ params }: { params: { id: string } }) {
-  const session = await getServerSession(carpectAuthOptions)
-  const userId = (session?.user as { id: string }).id
+  const supabase = createCarpectServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const userId = user!.id
 
-  const vehicle = await carpectPrisma.vehicle.findFirst({
-    where: { id: params.id, ownerId: userId },
-    include: {
-      inspections: {
-        orderBy: { createdAt: 'desc' },
-        include: { damages: true },
-      },
-    },
-  })
+  const { data: vehicle } = await supabase
+    .from('carpect_vehicles')
+    .select('*, inspections:carpect_inspections(*, damages:carpect_damages(*))')
+    .eq('id', params.id)
+    .eq('owner_id', userId)
+    .order('created_at', { ascending: false, referencedTable: 'carpect_inspections' })
+    .single()
+
   if (!vehicle) notFound()
 
   return (
@@ -29,7 +27,7 @@ export default async function CarPectVehicleDetailPage({ params }: { params: { i
         </Link>
         <div className="flex-1">
           <h1 className="text-2xl font-bold text-gray-900">{vehicle.make} {vehicle.model}</h1>
-          <p className="text-gray-500 text-sm mt-0.5">{vehicle.licensePlate} · {vehicle.year} · {vehicle.color}</p>
+          <p className="text-gray-500 text-sm mt-0.5">{vehicle.license_plate} · {vehicle.year} · {vehicle.color}</p>
         </div>
         <Link
           href={`/carpect/inspections/new?vehicleId=${vehicle.id}`}
@@ -46,7 +44,7 @@ export default async function CarPectVehicleDetailPage({ params }: { params: { i
             { label: 'Model', value: vehicle.model },
             { label: 'Year', value: vehicle.year },
             { label: 'Color', value: vehicle.color },
-            { label: 'License Plate', value: vehicle.licensePlate },
+            { label: 'License Plate', value: vehicle.license_plate },
             { label: 'VIN', value: vehicle.vin || '—' },
           ].map(({ label, value }) => (
             <div key={label}>
@@ -71,7 +69,7 @@ export default async function CarPectVehicleDetailPage({ params }: { params: { i
             <Plus className="w-3.5 h-3.5" /> New
           </Link>
         </div>
-        {vehicle.inspections.length === 0 ? (
+        {(vehicle.inspections as unknown[]).length === 0 ? (
           <div className="p-10 text-center">
             <ClipboardList className="w-8 h-8 text-gray-300 mx-auto mb-3" />
             <p className="text-gray-500 text-sm">No inspections for this vehicle yet</p>
@@ -81,13 +79,13 @@ export default async function CarPectVehicleDetailPage({ params }: { params: { i
           </div>
         ) : (
           <div className="divide-y divide-gray-100">
-            {vehicle.inspections.map(insp => (
+            {(vehicle.inspections as Array<{ id: string; type: string; status: string; created_at: string; damages: unknown[] }>).map(insp => (
               <Link key={insp.id} href={`/carpect/inspections/${insp.id}`} className="flex items-center justify-between p-5 hover:bg-gray-50 transition-colors">
                 <div className="flex items-center gap-3">
                   <div className={`w-2 h-2 rounded-full ${insp.type === 'PRE_RENTAL' ? 'bg-blue-500' : 'bg-purple-500'}`} />
                   <div>
                     <p className="text-sm font-medium text-gray-900">{insp.type.replace('_', ' ')}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{formatDate(insp.createdAt)}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">{formatDate(insp.created_at)}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">

@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Camera, Loader2, ArrowRight, Shield, Zap, BarChart3 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { createBrowserSupabaseClient } from '@/lib/hungerai/supabase'
 
 export default function CarPectRegisterPage() {
   const router = useRouter()
@@ -14,13 +15,13 @@ export default function CarPectRegisterPage() {
     e.preventDefault()
     setLoading(true)
     try {
-      const res = await fetch('/api/carpect/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+      const supabase = createBrowserSupabaseClient()
+      const { error } = await supabase.auth.signUp({
+        email: form.email,
+        password: form.password,
+        options: { data: { name: form.name, business_name: form.businessName, phone: form.phone } },
       })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error)
+      if (error) throw new Error(error.message)
       toast.success('Account created!')
       router.push('/carpect/login')
     } catch (err) {

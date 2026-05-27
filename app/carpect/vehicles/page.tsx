@@ -1,18 +1,17 @@
-import { getServerSession } from 'next-auth'
-import { carpectAuthOptions } from '@/lib/carpect/auth'
-import { carpectPrisma } from '@/lib/carpect/prisma'
+import { createCarpectServerClient } from '@/lib/carpect/supabase'
 import Link from 'next/link'
 import { Car, Plus, ClipboardList } from 'lucide-react'
 
 export default async function CarPectVehiclesPage() {
-  const session = await getServerSession(carpectAuthOptions)
-  const userId = (session?.user as { id: string }).id
+  const supabase = createCarpectServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const userId = user!.id
 
-  const vehicles = await carpectPrisma.vehicle.findMany({
-    where: { ownerId: userId },
-    include: { _count: { select: { inspections: true } } },
-    orderBy: { createdAt: 'desc' },
-  })
+  const { data: vehicles } = await supabase
+    .from('carpect_vehicles')
+    .select('*, inspections:carpect_inspections(count)')
+    .eq('owner_id', userId)
+    .order('created_at', { ascending: false })
 
   return (
     <div>
@@ -43,17 +42,17 @@ export default async function CarPectVehiclesPage() {
                 <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
                   <Car className="w-6 h-6 text-blue-600" />
                 </div>
-                <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">{v.year}</span>
+              <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">{v.year}</span>
               </div>
               <h3 className="font-semibold text-gray-900">{v.make} {v.model}</h3>
-              <p className="text-sm text-gray-500 mt-0.5">{v.licensePlate}</p>
+              <p className="text-sm text-gray-500 mt-0.5">{v.license_plate}</p>
               <div className="flex items-center gap-2 mt-3">
                 <div className="w-3 h-3 rounded-full border border-gray-300" style={{ backgroundColor: v.color.toLowerCase() }} />
                 <span className="text-xs text-gray-500 capitalize">{v.color}</span>
               </div>
               <div className="flex items-center gap-1.5 mt-4 pt-4 border-t border-gray-100">
                 <ClipboardList className="w-3.5 h-3.5 text-gray-400" />
-                <span className="text-xs text-gray-500">{v._count.inspections} inspection{v._count.inspections !== 1 ? 's' : ''}</span>
+                <span className="text-xs text-gray-500">{(v.inspections as { count: number }[])?.[0]?.count ?? 0} inspection{((v.inspections as { count: number }[])?.[0]?.count ?? 0) !== 1 ? 's' : ''}</span>
               </div>
             </Link>
           ))}

@@ -1,6 +1,4 @@
-import { getServerSession } from 'next-auth'
-import { carpectAuthOptions } from '@/lib/carpect/auth'
-import { carpectPrisma } from '@/lib/carpect/prisma'
+import { createCarpectServerClient } from '@/lib/carpect/supabase'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, CheckCircle, AlertTriangle, XCircle } from 'lucide-react'
@@ -9,24 +7,30 @@ import Image from 'next/image'
 import DownloadReportButton from '@/components/carpect/DownloadReportButton'
 
 export default async function CarPectReportPage({ params }: { params: { id: string } }) {
-  const session = await getServerSession(carpectAuthOptions)
-  const userId = (session?.user as { id: string }).id
+  const supabase = createCarpectServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const userId = user!.id
 
-  const inspection = await carpectPrisma.inspection.findFirst({
-    where: { id: params.id, userId },
-    include: {
-      vehicle: true,
-      images: true,
-      damages: { orderBy: { isNew: 'desc' } },
-    },
-  })
+  const { data: inspection } = await supabase
+    .from('carpect_inspections')
+    .select('*, vehicle:carpect_vehicles(*), images:carpect_inspection_images(*), damages:carpect_damages(*)')
+    .eq('id', params.id)
+    .eq('user_id', userId)
+    .order('is_new', { ascending: false, referencedTable: 'carpect_damages' })
+    .single()
+
   if (!inspection || inspection.status !== 'COMPLETED') notFound()
 
-  const aiReport = inspection.aiReport ? JSON.parse(inspection.aiReport) : null
-  const newDamages = inspection.damages.filter(d => d.isNew)
-  const existingDamages = inspection.damages.filter(d => !d.isNew)
-  const totalCost = inspection.damages.reduce((s, d) => s + (d.estimatedCost || 0), 0)
-  const isComparison = inspection.type === 'POST_RENTAL' && inspection.preInspectionId
+  type Damage = { id: string; severity: string; type: string; location: string; description: string; is_new: boolean; estimated_cost?: number | null }
+  type Image_ = { id: string; url: string; angle: string }
+  const damages = (inspection.damages as Damage[])
+  const images = (inspection.images as Image_[])
+  const aiReport = inspection.ai_report ? JSON.parse(inspection.ai_report) : null
+  const newDamages = damages.filter(d => d.is_new)
+  const existingDamages = damages.filter(d => !d.is_new)
+  const totalCost = damages.reduce((s, d) => s + (d.estimated_cost || 0), 0)
+  const vehicle = inspection.vehicle as { make: string; model: string; year: number; license_plate: string; color: string }
+  const isComparison = inspection.type === 'POST_RENTAL' && inspection.pre_inspection_id
 
   return (
     <div>
@@ -36,7 +40,7 @@ export default async function CarPectReportPage({ params }: { params: { id: stri
         </Link>
         <div className="flex-1">
           <h1 className="text-2xl font-bold text-gray-900">Inspection Report</h1>
-          <p className="text-gray-500 text-sm mt-0.5">{formatDate(inspection.createdAt)}</p>
+          <p className="text-gray-500 text-sm mt-0.5">{formatDate(inspection.created_at)}</p>
         </div>
         <DownloadReportButton inspectionId={params.id} />
       </div>
@@ -53,9 +57,9 @@ export default async function CarPectReportPage({ params }: { params: { id: stri
                 </span>
               </div>
               <h2 className="text-xl font-bold text-gray-900 mt-2">
-                {inspection.vehicle.make} {inspection.vehicle.model} {inspection.vehicle.year}
+                {vehicle.make} {vehicle.model} {vehicle.year}
               </h2>
-              <p className="text-gray-500 text-sm">{inspection.vehicle.licensePlate} · {inspection.vehicle.color}</p>
+              <p className="text-gray-500 text-sm">{vehicle.license_plate} · {vehicle.color}</p>
             </div>
             {aiReport && (
               <div className="text-right">
@@ -67,30 +71,30 @@ export default async function CarPectReportPage({ params }: { params: { id: stri
             )}
           </div>
 
-          {(inspection.renterName || inspection.rentalStart) && (
+          {(inspection.renter_name || inspection.rental_start) && (
             <div className="mt-4 pt-4 border-t border-gray-100 grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-              {inspection.renterName && (
+              {inspection.renter_name && (
                 <div>
                   <p className="text-xs text-gray-400 mb-0.5">Renter</p>
-                  <p className="font-medium text-gray-800">{inspection.renterName}</p>
+                  <p className="font-medium text-gray-800">{inspection.renter_name}</p>
                 </div>
               )}
-              {inspection.renterPhone && (
+              {inspection.renter_phone && (
                 <div>
                   <p className="text-xs text-gray-400 mb-0.5">Phone</p>
-                  <p className="font-medium text-gray-800">{inspection.renterPhone}</p>
+                  <p className="font-medium text-gray-800">{inspection.renter_phone}</p>
                 </div>
               )}
-              {inspection.rentalStart && (
+              {inspection.rental_start && (
                 <div>
                   <p className="text-xs text-gray-400 mb-0.5">Rental Start</p>
-                  <p className="font-medium text-gray-800">{formatDate(inspection.rentalStart)}</p>
+                  <p className="font-medium text-gray-800">{formatDate(inspection.rental_start)}</p>
                 </div>
               )}
-              {inspection.rentalEnd && (
+              {inspection.rental_end && (
                 <div>
                   <p className="text-xs text-gray-400 mb-0.5">Rental End</p>
-                  <p className="font-medium text-gray-800">{formatDate(inspection.rentalEnd)}</p>
+                  <p className="font-medium text-gray-800">{formatDate(inspection.rental_end)}</p>
                 </div>
               )}
             </div>
@@ -141,13 +145,13 @@ export default async function CarPectReportPage({ params }: { params: { id: stri
                       <p className="text-sm font-semibold text-gray-900">{d.location}</p>
                       <p className="text-xs text-gray-600 mt-0.5">{d.description}</p>
                     </div>
-                    {d.estimatedCost && <span className="font-bold text-red-700">{formatCurrency(d.estimatedCost)}</span>}
+                    {d.estimated_cost && <span className="font-bold text-red-700">{formatCurrency(d.estimated_cost)}</span>}
                   </div>
                 </div>
               ))}
               <div className="flex justify-end pt-2 border-t border-red-100">
                 <span className="font-bold text-red-800">
-                  Total new damage: {formatCurrency(newDamages.reduce((s, d) => s + (d.estimatedCost || 0), 0))}
+                  Total new damage: {formatCurrency(newDamages.reduce((s, d) => s + (d.estimated_cost || 0), 0))}
                 </span>
               </div>
             </div>
@@ -172,7 +176,7 @@ export default async function CarPectReportPage({ params }: { params: { id: stri
                       <p className="text-sm font-semibold text-gray-900">{d.location}</p>
                       <p className="text-xs text-gray-600 mt-0.5">{d.description}</p>
                     </div>
-                    {d.estimatedCost && <span className="font-semibold text-gray-700">{formatCurrency(d.estimatedCost)}</span>}
+                    {d.estimated_cost && <span className="font-semibold text-gray-700">{formatCurrency(d.estimated_cost)}</span>}
                   </div>
                 </div>
               ))}
@@ -199,11 +203,11 @@ export default async function CarPectReportPage({ params }: { params: { id: stri
           </div>
         )}
 
-        {inspection.images.length > 0 && (
+        {images.length > 0 && (
           <div className="bg-white rounded-xl border border-gray-200 p-5">
-            <h3 className="font-semibold text-gray-900 mb-4">Inspection Photos ({inspection.images.length})</h3>
+            <h3 className="font-semibold text-gray-900 mb-4">Inspection Photos ({images.length})</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {inspection.images.map(img => (
+              {images.map(img => (
                 <div key={img.id}>
                   <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden relative">
                     <Image src={img.url} alt={img.angle} fill className="object-cover" sizes="200px" />

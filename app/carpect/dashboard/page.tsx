@@ -1,40 +1,35 @@
-import { getServerSession } from 'next-auth'
-import { carpectAuthOptions } from '@/lib/carpect/auth'
-import { carpectPrisma } from '@/lib/carpect/prisma'
+import { createCarpectServerClient } from '@/lib/carpect/supabase'
 import Link from 'next/link'
 import { Car, ClipboardList, AlertTriangle, CheckCircle, Plus, ArrowRight, TrendingUp } from 'lucide-react'
 import CarPectDemoButton from '@/components/carpect/DemoButton'
 import { formatDate } from '@/lib/carpect/utils'
 
 export default async function CarPectDashboardPage() {
-  const session = await getServerSession(carpectAuthOptions)
-  const userId = (session?.user as { id: string }).id
+  const supabase = createCarpectServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const userId = user!.id
 
-  const [vehicleCount, totalInspections, completedInspections, recentInspections] = await Promise.all([
-    carpectPrisma.vehicle.count({ where: { ownerId: userId } }),
-    carpectPrisma.inspection.count({ where: { userId } }),
-    carpectPrisma.inspection.count({ where: { userId, status: 'COMPLETED' } }),
-    carpectPrisma.inspection.findMany({
-      where: { userId },
-      include: { vehicle: true, damages: true },
-      orderBy: { createdAt: 'desc' },
-      take: 6,
-    }),
+  const [{ count: vehicleCount }, { count: totalInspections }, { count: completedInspections }, { data: recentInspections }] = await Promise.all([
+    supabase.from('carpect_vehicles').select('*', { count: 'exact', head: true }).eq('owner_id', userId),
+    supabase.from('carpect_inspections').select('*', { count: 'exact', head: true }).eq('user_id', userId),
+    supabase.from('carpect_inspections').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('status', 'COMPLETED'),
+    supabase.from('carpect_inspections').select('*, vehicle:carpect_vehicles(*), damages:carpect_damages(*)').eq('user_id', userId).order('created_at', { ascending: false }).limit(6),
   ])
 
-  const damagesFound = await carpectPrisma.damage.count({
-    where: { inspection: { userId }, isNew: true },
-  })
+  const { count: damagesFound } = await supabase
+    .from('carpect_damages').select('id, inspection:carpect_inspections!inner(user_id)', { count: 'exact', head: true })
+    .eq('is_new', true).eq('carpect_inspections.user_id', userId)
 
-  const hasDemoData = await carpectPrisma.vehicle.count({
-    where: { ownerId: userId, licensePlate: { startsWith: 'DEMO-' } },
-  }).then(c => c > 0)
+  const { count: demoVehicleCount } = await supabase
+    .from('carpect_vehicles').select('*', { count: 'exact', head: true })
+    .eq('owner_id', userId).like('license_plate', 'DEMO-%')
+  const hasDemoData = (demoVehicleCount ?? 0) > 0
 
   const stats = [
-    { label: 'Fleet Vehicles', value: vehicleCount, icon: Car, gradient: 'from-blue-500 to-blue-600', shadow: 'shadow-blue-500/20' },
-    { label: 'Total Inspections', value: totalInspections, icon: ClipboardList, gradient: 'from-violet-500 to-violet-600', shadow: 'shadow-violet-500/20' },
-    { label: 'Completed', value: completedInspections, icon: CheckCircle, gradient: 'from-emerald-500 to-emerald-600', shadow: 'shadow-emerald-500/20' },
-    { label: 'New Damages', value: damagesFound, icon: AlertTriangle, gradient: 'from-orange-500 to-orange-600', shadow: 'shadow-orange-500/20' },
+    { label: 'Fleet Vehicles', value: vehicleCount ?? 0, icon: Car, gradient: 'from-blue-500 to-blue-600', shadow: 'shadow-blue-500/20' },
+    { label: 'Total Inspections', value: totalInspections ?? 0, icon: ClipboardList, gradient: 'from-violet-500 to-violet-600', shadow: 'shadow-violet-500/20' },
+    { label: 'Completed', value: completedInspections ?? 0, icon: CheckCircle, gradient: 'from-emerald-500 to-emerald-600', shadow: 'shadow-emerald-500/20' },
+    { label: 'New Damages', value: damagesFound ?? 0, icon: AlertTriangle, gradient: 'from-orange-500 to-orange-600', shadow: 'shadow-orange-500/20' },
   ]
 
   return (
@@ -43,7 +38,7 @@ export default async function CarPectDashboardPage() {
         <div>
           <h1 className="text-2xl font-black text-gray-900 tracking-tight">Dashboard</h1>
           <p className="text-gray-400 text-sm mt-1">
-            Good to see you, <span className="font-semibold text-gray-600">{session?.user?.name?.split(' ')[0]}</span>
+            Good to see you, <span className="font-semibold text-gray-600">{user?.user_metadata?.name?.split(' ')[0] || 'there'}</span>
           </p>
         </div>
         <div className="flex items-center gap-2.5">
@@ -93,7 +88,7 @@ export default async function CarPectDashboardPage() {
           </div>
         ) : (
           <div className="divide-y divide-gray-50">
-            {recentInspections.map(insp => (
+            {(recentInspections ?? []).map(insp => (
               <Link key={insp.id} href={`/carpect/inspections/${insp.id}`}
                 className="flex items-center justify-between px-6 py-4 hover:bg-gray-50/50 transition-colors group">
                 <div className="flex items-center gap-4">
@@ -101,20 +96,20 @@ export default async function CarPectDashboardPage() {
                     <Car className="w-4 h-4 text-gray-500 group-hover:text-blue-500 transition-colors" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-gray-900">{insp.vehicle.make} {insp.vehicle.model}</p>
-                    <p className="text-xs text-gray-400">{insp.vehicle.licensePlate} · {insp.type.replace('_', ' ')}</p>
+                    <p className="text-sm font-semibold text-gray-900">{(insp.vehicle as { make: string; model: string }).make} {(insp.vehicle as { make: string; model: string }).model}</p>
+                    <p className="text-xs text-gray-400">{(insp.vehicle as { license_plate: string }).license_plate} · {insp.type.replace('_', ' ')}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  {insp.damages.length > 0 && (
-                    <span className="text-xs text-orange-500 font-medium">{insp.damages.length} damage{insp.damages.length !== 1 ? 's' : ''}</span>
+                  {(insp.damages as unknown[]).length > 0 && (
+                    <span className="text-xs text-orange-500 font-medium">{(insp.damages as unknown[]).length} damage{(insp.damages as unknown[]).length !== 1 ? 's' : ''}</span>
                   )}
                   <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${
                     insp.status === 'COMPLETED' ? 'bg-green-100 text-green-700' :
                     insp.status === 'IN_PROGRESS' ? 'bg-yellow-100 text-yellow-700' :
                     'bg-gray-100 text-gray-600'
                   }`}>{insp.status.replace('_', ' ')}</span>
-                  <span className="text-xs text-gray-400">{formatDate(insp.createdAt)}</span>
+                  <span className="text-xs text-gray-400">{formatDate(insp.created_at)}</span>
                 </div>
               </Link>
             ))}

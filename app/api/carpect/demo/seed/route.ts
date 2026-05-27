@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { carpectAuthOptions } from '@/lib/carpect/auth'
-import { carpectPrisma } from '@/lib/carpect/prisma'
+import { createCarpectServerClient } from '@/lib/carpect/supabase'
 
 const PRE_REPORT = JSON.stringify({
   overallCondition: 'fair',
@@ -50,17 +48,15 @@ const CLEAN_POST_REPORT = JSON.stringify({
 })
 
 export async function POST() {
-  const session = await getServerSession(carpectAuthOptions)
-  if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const supabase = createCarpectServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const userId = (session.user as { id: string }).id
+  const userId = user.id
 
-  const existingDemo = await carpectPrisma.vehicle.findFirst({
-    where: { ownerId: userId, licensePlate: 'DEMO-001' },
-  })
-  if (existingDemo) {
-    return NextResponse.json({ message: 'Demo data already loaded', alreadyExists: true })
-  }
+  const { data: existingDemo } = await supabase
+    .from('carpect_vehicles').select('id').eq('owner_id', userId).like('license_plate', 'DEMO-%').limit(1).single()
+  if (existingDemo) return NextResponse.json({ message: 'Demo data already loaded', alreadyExists: true })
 
   const now = new Date()
   const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000)
@@ -68,90 +64,75 @@ export async function POST() {
   const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000)
 
   // Vehicle 1: Toyota Corolla — damage dispute scenario
-  const corolla = await carpectPrisma.vehicle.create({
-    data: { make: 'Toyota', model: 'Corolla', year: 2022, licensePlate: 'DEMO-001', color: 'White', ownerId: userId, notes: 'Demo vehicle — Lahore fleet car #1' },
-  })
-  const corollaPre = await carpectPrisma.inspection.create({
-    data: {
-      vehicleId: corolla.id, userId,
-      type: 'PRE_RENTAL', status: 'COMPLETED',
-      renterName: 'Ali Hassan', renterPhone: '+92 300 1234567',
-      rentalStart: threeDaysAgo, rentalEnd: yesterday,
-      aiReport: PRE_REPORT, createdAt: threeDaysAgo, updatedAt: threeDaysAgo,
-    },
-  })
-  await carpectPrisma.damage.createMany({
-    data: [
-      { inspectionId: corollaPre.id, type: 'scratch', severity: 'minor', location: 'Front bumper (left side)', description: 'Light surface scratch approx. 8cm, paint intact', estimatedCost: 45, isNew: false },
-      { inspectionId: corollaPre.id, type: 'dent', severity: 'moderate', location: 'Rear left door panel', description: 'Small dent approx. 4cm diameter, no paint damage', estimatedCost: 180, isNew: false },
-      { inspectionId: corollaPre.id, type: 'paint_chip', severity: 'minor', location: 'Hood (centre)', description: 'Two small paint chips from stone impacts', estimatedCost: 60, isNew: false },
-    ],
-  })
-  const corollaPost = await carpectPrisma.inspection.create({
-    data: {
-      vehicleId: corolla.id, userId,
-      type: 'POST_RENTAL', status: 'COMPLETED',
-      renterName: 'Ali Hassan', renterPhone: '+92 300 1234567',
-      rentalStart: threeDaysAgo, rentalEnd: yesterday,
-      preInspectionId: corollaPre.id,
-      aiReport: POST_REPORT, createdAt: yesterday, updatedAt: yesterday,
-    },
-  })
-  await carpectPrisma.damage.createMany({
-    data: [
-      { inspectionId: corollaPost.id, type: 'crack', severity: 'severe', location: 'Rear bumper (right side)', description: 'Clear impact crack approx. 15cm, plastic split — likely parking collision', estimatedCost: 320, isNew: true },
-      { inspectionId: corollaPost.id, type: 'scratch', severity: 'minor', location: 'Front bumper (left side)', description: 'Light surface scratch approx. 8cm, paint intact', estimatedCost: 45, isNew: false },
-      { inspectionId: corollaPost.id, type: 'dent', severity: 'moderate', location: 'Rear left door panel', description: 'Small dent approx. 4cm diameter, no paint damage', estimatedCost: 180, isNew: false },
-      { inspectionId: corollaPost.id, type: 'paint_chip', severity: 'minor', location: 'Hood (centre)', description: 'Two small paint chips from stone impacts', estimatedCost: 60, isNew: false },
-    ],
-  })
+  const { data: corolla } = await supabase.from('carpect_vehicles').insert({ make: 'Toyota', model: 'Corolla', year: 2022, license_plate: 'DEMO-001', color: 'White', owner_id: userId, notes: 'Demo vehicle — Lahore fleet car #1' }).select().single()
+  if (!corolla) return NextResponse.json({ error: 'Failed to create demo vehicle' }, { status: 500 })
+  const { data: corollaPre } = await supabase.from('carpect_inspections').insert({
+    vehicle_id: corolla.id, user_id: userId,
+    type: 'PRE_RENTAL', status: 'COMPLETED',
+    renter_name: 'Ali Hassan', renter_phone: '+92 300 1234567',
+    rental_start: threeDaysAgo, rental_end: yesterday,
+    ai_report: PRE_REPORT,
+  }).select().single()
+  if (corollaPre) {
+    await supabase.from('carpect_damages').insert([
+      { inspection_id: corollaPre.id, type: 'scratch', severity: 'minor', location: 'Front bumper (left side)', description: 'Light surface scratch approx. 8cm, paint intact', estimated_cost: 45, is_new: false },
+      { inspection_id: corollaPre.id, type: 'dent', severity: 'moderate', location: 'Rear left door panel', description: 'Small dent approx. 4cm diameter, no paint damage', estimated_cost: 180, is_new: false },
+      { inspection_id: corollaPre.id, type: 'paint_chip', severity: 'minor', location: 'Hood (centre)', description: 'Two small paint chips from stone impacts', estimated_cost: 60, is_new: false },
+    ])
+  }
+  const { data: corollaPost } = await supabase.from('carpect_inspections').insert({
+    vehicle_id: corolla.id, user_id: userId,
+    type: 'POST_RENTAL', status: 'COMPLETED',
+    renter_name: 'Ali Hassan', renter_phone: '+92 300 1234567',
+    rental_start: threeDaysAgo, rental_end: yesterday,
+    pre_inspection_id: corollaPre?.id,
+    ai_report: POST_REPORT,
+  }).select().single()
+  if (corollaPost) {
+    await supabase.from('carpect_damages').insert([
+      { inspection_id: corollaPost.id, type: 'crack', severity: 'severe', location: 'Rear bumper (right side)', description: 'Clear impact crack approx. 15cm, plastic split — likely parking collision', estimated_cost: 320, is_new: true },
+      { inspection_id: corollaPost.id, type: 'scratch', severity: 'minor', location: 'Front bumper (left side)', description: 'Light surface scratch approx. 8cm, paint intact', estimated_cost: 45, is_new: false },
+      { inspection_id: corollaPost.id, type: 'dent', severity: 'moderate', location: 'Rear left door panel', description: 'Small dent approx. 4cm diameter, no paint damage', estimated_cost: 180, is_new: false },
+      { inspection_id: corollaPost.id, type: 'paint_chip', severity: 'minor', location: 'Hood (centre)', description: 'Two small paint chips from stone impacts', estimated_cost: 60, is_new: false },
+    ])
+  }
 
   // Vehicle 2: Honda Civic — clean return
-  const civic = await carpectPrisma.vehicle.create({
-    data: { make: 'Honda', model: 'Civic', year: 2023, licensePlate: 'DEMO-002', color: 'Silver', ownerId: userId, notes: 'Demo vehicle — Lahore fleet car #2' },
-  })
-  const civicPre = await carpectPrisma.inspection.create({
-    data: {
-      vehicleId: civic.id, userId,
+  const { data: civic } = await supabase.from('carpect_vehicles').insert({ make: 'Honda', model: 'Civic', year: 2023, license_plate: 'DEMO-002', color: 'Silver', owner_id: userId, notes: 'Demo vehicle — Lahore fleet car #2' }).select().single()
+  if (civic) {
+    const { data: civicPre } = await supabase.from('carpect_inspections').insert({
+      vehicle_id: civic.id, user_id: userId,
       type: 'PRE_RENTAL', status: 'COMPLETED',
-      renterName: 'Fatima Sheikh', renterPhone: '+92 321 9876543',
-      rentalStart: twoDaysAgo, rentalEnd: now,
-      aiReport: CIVIC_PRE_REPORT, createdAt: twoDaysAgo, updatedAt: twoDaysAgo,
-    },
-  })
-  await carpectPrisma.damage.createMany({
-    data: [
-      { inspectionId: civicPre.id, type: 'scratch', severity: 'minor', location: 'Front left door', description: 'Hairline scratch on door edge, pre-existing', estimatedCost: 35, isNew: false },
-    ],
-  })
-  const civicPost = await carpectPrisma.inspection.create({
-    data: {
-      vehicleId: civic.id, userId,
-      type: 'POST_RENTAL', status: 'COMPLETED',
-      renterName: 'Fatima Sheikh', renterPhone: '+92 321 9876543',
-      rentalStart: twoDaysAgo, rentalEnd: now,
-      preInspectionId: civicPre.id,
-      aiReport: CLEAN_POST_REPORT, createdAt: now, updatedAt: now,
-    },
-  })
-  await carpectPrisma.damage.createMany({
-    data: [
-      { inspectionId: civicPost.id, type: 'scratch', severity: 'minor', location: 'Front left door', description: 'Hairline scratch on door edge, pre-existing', estimatedCost: 35, isNew: false },
-    ],
-  })
+      renter_name: 'Fatima Sheikh', renter_phone: '+92 321 9876543',
+      rental_start: twoDaysAgo, rental_end: now,
+      ai_report: CIVIC_PRE_REPORT,
+    }).select().single()
+    if (civicPre) {
+      await supabase.from('carpect_damages').insert([{ inspection_id: civicPre.id, type: 'scratch', severity: 'minor', location: 'Front left door', description: 'Hairline scratch on door edge, pre-existing', estimated_cost: 35, is_new: false }])
+      const { data: civicPost } = await supabase.from('carpect_inspections').insert({
+        vehicle_id: civic.id, user_id: userId,
+        type: 'POST_RENTAL', status: 'COMPLETED',
+        renter_name: 'Fatima Sheikh', renter_phone: '+92 321 9876543',
+        rental_start: twoDaysAgo, rental_end: now,
+        pre_inspection_id: civicPre.id,
+        ai_report: CLEAN_POST_REPORT,
+      }).select().single()
+      if (civicPost) {
+        await supabase.from('carpect_damages').insert([{ inspection_id: civicPost.id, type: 'scratch', severity: 'minor', location: 'Front left door', description: 'Hairline scratch on door edge, pre-existing', estimated_cost: 35, is_new: false }])
+      }
+    }
+  }
 
   // Vehicle 3: Suzuki Alto — pending inspection
-  const alto = await carpectPrisma.vehicle.create({
-    data: { make: 'Suzuki', model: 'Alto', year: 2021, licensePlate: 'DEMO-003', color: 'Red', ownerId: userId, notes: 'Demo vehicle — awaiting pre-rental inspection' },
-  })
-  await carpectPrisma.inspection.create({
-    data: {
-      vehicleId: alto.id, userId,
+  const { data: alto } = await supabase.from('carpect_vehicles').insert({ make: 'Suzuki', model: 'Alto', year: 2021, license_plate: 'DEMO-003', color: 'Red', owner_id: userId, notes: 'Demo vehicle — awaiting pre-rental inspection' }).select().single()
+  if (alto) {
+    await supabase.from('carpect_inspections').insert({
+      vehicle_id: alto.id, user_id: userId,
       type: 'PRE_RENTAL', status: 'PENDING',
-      renterName: 'Usman Tariq', renterPhone: '+92 333 5551234',
-      rentalStart: now,
-    },
-  })
+      renter_name: 'Usman Tariq', renter_phone: '+92 333 5551234',
+      rental_start: now,
+    })
+  }
 
   return NextResponse.json({
     message: 'Demo data loaded successfully',
@@ -164,18 +145,15 @@ export async function POST() {
 }
 
 export async function DELETE() {
-  const session = await getServerSession(carpectAuthOptions)
-  if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const supabase = createCarpectServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const userId = (session.user as { id: string }).id
-
-  const demoVehicles = await carpectPrisma.vehicle.findMany({
-    where: { ownerId: userId, licensePlate: { startsWith: 'DEMO-' } },
-    select: { id: true },
-  })
-  const ids = demoVehicles.map(v => v.id)
+  const { data: demoVehicles } = await supabase
+    .from('carpect_vehicles').select('id').eq('owner_id', user.id).like('license_plate', 'DEMO-%')
+  const ids = (demoVehicles ?? []).map((v: { id: string }) => v.id)
   if (ids.length === 0) return NextResponse.json({ message: 'No demo data found' })
 
-  await carpectPrisma.vehicle.deleteMany({ where: { id: { in: ids } } })
+  await supabase.from('carpect_vehicles').delete().in('id', ids)
   return NextResponse.json({ message: 'Demo data removed' })
 }

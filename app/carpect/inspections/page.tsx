@@ -1,19 +1,18 @@
-import { getServerSession } from 'next-auth'
-import { carpectAuthOptions } from '@/lib/carpect/auth'
-import { carpectPrisma } from '@/lib/carpect/prisma'
+import { createCarpectServerClient } from '@/lib/carpect/supabase'
 import Link from 'next/link'
 import { ClipboardList, Plus, Car } from 'lucide-react'
 import { formatDate } from '@/lib/carpect/utils'
 
 export default async function CarPectInspectionsPage() {
-  const session = await getServerSession(carpectAuthOptions)
-  const userId = (session?.user as { id: string }).id
+  const supabase = createCarpectServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const userId = user!.id
 
-  const inspections = await carpectPrisma.inspection.findMany({
-    where: { userId },
-    include: { vehicle: true, damages: true, images: { take: 1 } },
-    orderBy: { createdAt: 'desc' },
-  })
+  const { data: inspections } = await supabase
+    .from('carpect_inspections')
+    .select('*, vehicle:carpect_vehicles(*), damages:carpect_damages(*)')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
 
   return (
     <div>
@@ -58,7 +57,7 @@ export default async function CarPectInspectionsPage() {
                       </div>
                       <div>
                         <div className="text-sm font-medium text-gray-900">{insp.vehicle.make} {insp.vehicle.model}</div>
-                        <div className="text-xs text-gray-500">{insp.vehicle.licensePlate}</div>
+                        <div className="text-xs text-gray-500">{(insp.vehicle as { license_plate: string }).license_plate}</div>
                       </div>
                     </Link>
                   </td>
@@ -82,7 +81,7 @@ export default async function CarPectInspectionsPage() {
                     <span className="text-sm text-gray-900">{insp.damages.length}</span>
                   </td>
                   <td className="px-5 py-4">
-                    <span className="text-sm text-gray-500">{formatDate(insp.createdAt)}</span>
+                    <span className="text-sm text-gray-500">{formatDate(insp.created_at)}</span>
                   </td>
                 </tr>
               ))}

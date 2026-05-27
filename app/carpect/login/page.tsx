@@ -1,10 +1,10 @@
 'use client'
 import { useState } from 'react'
-import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Camera, Loader2, ArrowRight, CheckCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { createBrowserSupabaseClient } from '@/lib/hungerai/supabase'
 
 export default function CarPectLoginPage() {
   const router = useRouter()
@@ -14,9 +14,10 @@ export default function CarPectLoginPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
-    const res = await signIn('credentials', { ...form, redirect: false })
+    const supabase = createBrowserSupabaseClient()
+    const { error } = await supabase.auth.signInWithPassword({ email: form.email, password: form.password })
     setLoading(false)
-    if (res?.error) {
+    if (error) {
       toast.error('Invalid email or password')
     } else {
       router.push('/carpect/dashboard')

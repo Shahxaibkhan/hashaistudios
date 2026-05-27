@@ -1,37 +1,32 @@
 import { NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { carpectAuthOptions } from '@/lib/carpect/auth'
-import { carpectPrisma } from '@/lib/carpect/prisma'
+import { createCarpectServerClient } from '@/lib/carpect/supabase'
 
 export async function GET(_: Request, { params }: { params: { id: string } }) {
-  const session = await getServerSession(carpectAuthOptions)
-  if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const supabase = createCarpectServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const userId = (session.user as { id: string }).id
-  const inspection = await carpectPrisma.inspection.findFirst({
-    where: { id: params.id, userId },
-    include: {
-      vehicle: true,
-      images: { orderBy: { createdAt: 'asc' } },
-      damages: { orderBy: { createdAt: 'asc' } },
-    },
-  })
-  if (!inspection) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  const { data: inspection, error } = await supabase
+    .from('carpect_inspections')
+    .select('*, vehicle:carpect_vehicles(*), images:carpect_inspection_images(*), damages:carpect_damages(*)')
+    .eq('id', params.id)
+    .eq('user_id', user.id)
+    .single()
+  if (error || !inspection) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   return NextResponse.json(inspection)
 }
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
-  const session = await getServerSession(carpectAuthOptions)
-  if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const supabase = createCarpectServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const userId = (session.user as { id: string }).id
-  const inspection = await carpectPrisma.inspection.findFirst({ where: { id: params.id, userId } })
-  if (!inspection) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  const { data: existing } = await supabase.from('carpect_inspections').select('id').eq('id', params.id).eq('user_id', user.id).single()
+  if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   const body = await req.json()
-  const updated = await carpectPrisma.inspection.update({
-    where: { id: params.id },
-    data: body,
-  })
+  const { data: updated, error } = await supabase
+    .from('carpect_inspections').update({ ...body, updated_at: new Date().toISOString() }).eq('id', params.id).select().single()
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json(updated)
 }

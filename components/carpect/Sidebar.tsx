@@ -1,8 +1,8 @@
 'use client'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { signOut } from 'next-auth/react'
+import { usePathname, useRouter } from 'next/navigation'
 import { Camera, LayoutDashboard, Car, ClipboardList, LogOut, ChevronRight } from 'lucide-react'
+import { createBrowserSupabaseClient } from '@/lib/hungerai/supabase'
 
 const nav = [
   { href: '/carpect/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -12,7 +12,15 @@ const nav = [
 
 export default function CarPectSidebar({ user }: { user: { name?: string | null; email?: string | null } }) {
   const pathname = usePathname()
+  const router = useRouter()
   const initials = user.name?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || 'U'
+
+  async function handleSignOut() {
+    const supabase = createBrowserSupabaseClient()
+    await supabase.auth.signOut()
+    router.push('/carpect/login')
+    router.refresh()
+  }
 
   return (
     <aside className="w-60 bg-gray-950 flex flex-col h-full shrink-0 border-r border-white/5">
@@ -61,7 +69,7 @@ export default function CarPectSidebar({ user }: { user: { name?: string | null;
           </div>
         </div>
         <button
-          onClick={() => signOut({ callbackUrl: '/carpect/login' })}
+          onClick={handleSignOut}
           className="w-full flex items-center gap-3 px-3 py-2.5 text-xs text-gray-500 hover:text-red-400 hover:bg-red-500/5 rounded-xl transition-all"
         >
           <LogOut className="w-3.5 h-3.5" />

@@ -1,8 +1,8 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Camera, Loader2, CheckCircle } from 'lucide-react'
+import { createBrowserSupabaseClient } from '@/lib/hungerai/supabase'
 
 const STEPS = [
   'Setting up demo account…',
@@ -25,8 +25,9 @@ export default function CarPectDemoPage() {
         const { email, password } = await res.json()
 
         setStep(3)
-        const result = await signIn('credentials', { email, password, redirect: false })
-        if (result?.error) throw new Error('Sign-in failed')
+        const supabase = createBrowserSupabaseClient()
+        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+        if (signInError) throw new Error('Sign-in failed')
 
         router.push('/carpect/dashboard')
         router.refresh()
