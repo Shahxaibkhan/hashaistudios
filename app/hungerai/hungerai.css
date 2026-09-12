@@ -470,6 +470,10 @@
 }
 
 /* Category Tab */
+.hungerai .hai-category-tabs-wrap {
+  position: relative;
+}
+
 .hungerai .hai-category-tabs {
   display: flex;
   gap: 10px;
@@ -482,6 +486,32 @@
 
 .hungerai .hai-category-tabs::-webkit-scrollbar {
   display: none;
+}
+
+/* Fade hint so a horizontally-scrollable category row doesn't look like
+   it ends abruptly — visibility is toggled in JS based on scroll position. */
+.hungerai .hai-category-fade {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 28px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.hungerai .hai-category-fade.visible {
+  opacity: 1;
+}
+
+.hungerai .hai-category-fade-left {
+  left: 0;
+  background: linear-gradient(to right, var(--hai-bg-primary), transparent);
+}
+
+.hungerai .hai-category-fade-right {
+  right: 0;
+  background: linear-gradient(to left, var(--hai-bg-primary), transparent);
 }
 
 .hungerai .hai-category-tab {
