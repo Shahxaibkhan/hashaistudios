@@ -13,12 +13,16 @@ interface Stats {
   topItem: string | null;
 }
 
+const WHATSAPP_SALES_NUMBER = "923434994409";
+
 export default function DashboardHomePage() {
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [stats, setStats] = useState<Stats | null>(null);
   const [recentOrders, setRecentOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [menuCounts, setMenuCounts] = useState<{ categories: number; items: number } | null>(null);
+  const [checklistDismissed, setChecklistDismissed] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -38,6 +42,18 @@ export default function DashboardHomePage() {
 
       if (!restaurantData) return;
       setRestaurant(restaurantData as Restaurant);
+
+      const [{ count: categoriesCount }, { count: itemsCount }] = await Promise.all([
+        supabase
+          .from("categories")
+          .select("*", { count: "exact", head: true })
+          .eq("restaurant_id", restaurantData.id),
+        supabase
+          .from("menu_items")
+          .select("*", { count: "exact", head: true })
+          .eq("restaurant_id", restaurantData.id),
+      ]);
+      setMenuCounts({ categories: categoriesCount ?? 0, items: itemsCount ?? 0 });
 
       const now = new Date();
       const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
@@ -97,8 +113,64 @@ export default function DashboardHomePage() {
     );
   }
 
+  const setupComplete = !menuCounts || (menuCounts.categories > 0 && menuCounts.items > 0);
+  const showChecklist = !setupComplete && !checklistDismissed;
+
+  const handleRequestUpgrade = () => {
+    if (!restaurant) return;
+    const planLabel = restaurant.subscription_plan
+      ? restaurant.subscription_plan.charAt(0).toUpperCase() + restaurant.subscription_plan.slice(1)
+      : restaurant.subscription_status;
+    const msg = encodeURIComponent(
+      `Hi! I'd like to upgrade my HungerAI plan.\n\nRestaurant: ${restaurant.name}\nCurrent plan: ${planLabel}\n\nPlease help me upgrade!`
+    );
+    window.open(`https://wa.me/${WHATSAPP_SALES_NUMBER}?text=${msg}`, "_blank", "noopener,noreferrer");
+  };
+
   return (
     <div className="space-y-8">
+      {/* Getting Started checklist — shown until the owner has at least one category + item */}
+      {showChecklist && (
+        <div className="hai-card p-6">
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <h3 className="font-display text-lg font-bold">Getting Started</h3>
+              <p className="text-sm text-[var(--hai-text-muted)] mt-1">
+                A couple of quick steps and your menu is live.
+              </p>
+            </div>
+            <button
+              onClick={() => setChecklistDismissed(true)}
+              className="text-[var(--hai-text-muted)] hover:text-[var(--hai-text-primary)] text-sm"
+              aria-label="Dismiss"
+            >
+              ✕
+            </button>
+          </div>
+          <div className="space-y-2">
+            <ChecklistStep
+              done={(menuCounts?.categories ?? 0) > 0}
+              label="Add your first menu category"
+              href="/hungerai/dashboard/menu?openCategoryModal=1"
+            />
+            <ChecklistStep
+              done={(menuCounts?.items ?? 0) > 0}
+              label="Add your first menu item"
+              href={
+                (menuCounts?.categories ?? 0) > 0
+                  ? "/hungerai/dashboard/menu?openItemModal=1"
+                  : "/hungerai/dashboard/menu?openCategoryModal=1"
+              }
+            />
+            <ChecklistStep
+              done={false}
+              label="Share your menu link with customers"
+              href="#menu-link"
+            />
+          </div>
+        </div>
+      )}
+
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
@@ -158,7 +230,7 @@ export default function DashboardHomePage() {
 
       {/* Menu Link Card */}
       {restaurant && (
-        <div className="hai-card p-6">
+        <div id="menu-link" className="hai-card p-6">
           <div className="flex items-start justify-between mb-4">
             <div>
               <h3 className="font-display text-lg font-bold">Your Menu Link</h3>
@@ -196,6 +268,23 @@ export default function DashboardHomePage() {
               )}
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Plan / Upgrade */}
+      {restaurant && (
+        <div className="hai-card p-6 flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <h3 className="font-display text-lg font-bold">Your Plan</h3>
+            <p className="text-sm text-[var(--hai-text-muted)] mt-1 capitalize">
+              {restaurant.subscription_plan
+                ? `${restaurant.subscription_plan} · ${restaurant.subscription_status}`
+                : restaurant.subscription_status}
+            </p>
+          </div>
+          <button onClick={handleRequestUpgrade} className="hai-btn hai-btn-primary">
+            Request Upgrade
+          </button>
         </div>
       )}
 
@@ -256,6 +345,28 @@ function StatCard({
         )}
       </div>
     </div>
+  );
+}
+
+function ChecklistStep({ done, label, href }: { done: boolean; label: string; href: string }) {
+  return (
+    <Link
+      href={href as any}
+      className="flex items-center gap-3 p-3 rounded-xl hover:bg-[var(--hai-bg-secondary)] transition-colors"
+    >
+      <span
+        className={`w-5 h-5 rounded-full flex items-center justify-center text-xs flex-shrink-0 ${
+          done
+            ? "bg-[var(--hai-accent-green)] text-white"
+            : "border border-[var(--hai-border)] text-transparent"
+        }`}
+      >
+        ✓
+      </span>
+      <span className={`text-sm ${done ? "line-through text-[var(--hai-text-muted)]" : "text-[var(--hai-text-primary)]"}`}>
+        {label}
+      </span>
+    </Link>
   );
 }
 

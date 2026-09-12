@@ -17,6 +17,7 @@ export interface Restaurant {
   opening_time: string | null; // e.g. "09:00" (24h, PKT)
   closing_time: string | null; // e.g. "23:00" (24h, PKT)
   owner_email: string | null;
+  owner_id: string | null; // FK to auth.users(id) — set for self-serve signups, may be null for legacy/admin-created rows
   online_payment_details: string | null; // bank/JazzCash details
   card_on_delivery_enabled: boolean;
   pickup_enabled: boolean;       // restaurant offers self-pickup

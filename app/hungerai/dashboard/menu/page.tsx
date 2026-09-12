@@ -25,6 +25,24 @@ export default function MenuEditorPage() {
     fetchMenu();
   }, []);
 
+  // Getting Started checklist (dashboard home) links here with a query param
+  // to auto-open the relevant modal for a brand-new restaurant's first setup.
+  useEffect(() => {
+    if (loading) return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("openCategoryModal") === "1") {
+      setEditingCategory(null);
+      setShowCategoryModal(true);
+      window.history.replaceState(null, "", "/hungerai/dashboard/menu");
+    } else if (params.get("openItemModal") === "1" && categories.length > 0) {
+      setEditingItem(null);
+      setSelectedCategoryId(categories[0].id);
+      setShowItemModal(true);
+      window.history.replaceState(null, "", "/hungerai/dashboard/menu");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, categories]);
+
   const fetchMenu = async () => {
     const supabase = createBrowserSupabaseClient();
 
