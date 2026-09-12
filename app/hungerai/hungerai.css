@@ -494,7 +494,9 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 28px;
+  width: 36px;
+  display: flex;
+  align-items: center;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.15s ease;
@@ -506,12 +508,32 @@
 
 .hungerai .hai-category-fade-left {
   left: 0;
-  background: linear-gradient(to right, var(--hai-bg-primary), transparent);
+  justify-content: flex-start;
+  background: linear-gradient(to right, var(--hai-bg-primary) 40%, transparent);
 }
 
 .hungerai .hai-category-fade-right {
   right: 0;
-  background: linear-gradient(to left, var(--hai-bg-primary), transparent);
+  justify-content: flex-end;
+  background: linear-gradient(to left, var(--hai-bg-primary) 40%, transparent);
+}
+
+/* A gradient alone is too subtle when the tab beneath it is already
+   white — a small chevron makes "there's more, swipe me" unambiguous. */
+.hungerai .hai-category-chevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--hai-bg-card);
+  border: 1.5px solid var(--hai-border);
+  color: var(--hai-accent-primary);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
 .hungerai .hai-category-tab {

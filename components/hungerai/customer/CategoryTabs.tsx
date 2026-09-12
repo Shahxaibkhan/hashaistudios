@@ -49,8 +49,12 @@ export default function CategoryTabs({
           </button>
         ))}
       </div>
-      <div className={`hai-category-fade hai-category-fade-left ${canScrollLeft ? "visible" : ""}`} />
-      <div className={`hai-category-fade hai-category-fade-right ${canScrollRight ? "visible" : ""}`} />
+      <div className={`hai-category-fade hai-category-fade-left ${canScrollLeft ? "visible" : ""}`}>
+        <span className="hai-category-chevron">‹</span>
+      </div>
+      <div className={`hai-category-fade hai-category-fade-right ${canScrollRight ? "visible" : ""}`}>
+        <span className="hai-category-chevron">›</span>
+      </div>
     </div>
   );
 }
