@@ -7,7 +7,7 @@ import { createBrowserSupabaseClient } from "@/lib/hungerai/supabase";
 import type { Restaurant } from "@/types/hungerai";
 
 interface ConfirmationPageProps {
-  params: Promise<{ slug: string }>;
+  params: { slug: string };
 }
 
 function ConfirmationContent({ slug }: { slug: string }) {
@@ -102,27 +102,13 @@ function ConfirmationContent({ slug }: { slug: string }) {
 }
 
 export default function ConfirmationPage({ params }: ConfirmationPageProps) {
-  const [slug, setSlug] = useState<string | null>(null);
-
-  useEffect(() => {
-    params.then((p) => setSlug(p.slug));
-  }, [params]);
-
-  if (!slug) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="hai-skeleton w-32 h-8" />
-      </div>
-    );
-  }
-
   return (
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center">
         <div className="hai-skeleton w-32 h-8" />
       </div>
     }>
-      <ConfirmationContent slug={slug} />
+      <ConfirmationContent slug={params.slug} />
     </Suspense>
   );
 }
