@@ -31,6 +31,16 @@ export const orderPayloadSchema = z.object({
 
 export type OrderPayloadInput = z.infer<typeof orderPayloadSchema>;
 
+// Shared by both restaurant-creation paths (admin + self-serve signup): a
+// single owner-facing tax rate, defaulting to no tax. Applied to both
+// tax_cod_percent and tax_online_percent — most small restaurants don't need
+// a different rate per payment method, and the two-rate split in the schema
+// stays available for a future settings screen to differentiate if needed.
+const taxFields = {
+  tax_enabled: z.boolean().optional(),
+  tax_percent: z.number().min(0).max(100).optional(),
+};
+
 export const restaurantCreateSchema = z.object({
   slug: z.string().min(2).max(60),
   name: z.string().trim().min(1).max(120),
@@ -48,6 +58,7 @@ export const restaurantCreateSchema = z.object({
   delivery_enabled: z.boolean().optional(),
   pickup_address: z.string().max(500).nullable().optional(),
   is_open: z.boolean().optional(),
+  ...taxFields,
 });
 
 export const signupSchema = z
@@ -57,6 +68,7 @@ export const signupSchema = z
     whatsapp_number: z.string().trim().min(5).max(20),
     access_token: z.string().min(1).optional(),
     user_id: z.string().uuid().optional(),
+    ...taxFields,
   })
   .refine((data) => !!data.access_token || !!data.user_id, {
     message: "Missing access_token or user_id",

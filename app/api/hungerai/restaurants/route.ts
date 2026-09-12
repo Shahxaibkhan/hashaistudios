@@ -35,6 +35,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const taxEnabled = !!body.tax_enabled && (body.tax_percent ?? 0) > 0;
+
     // Create restaurant
     const { data: restaurant, error } = await supabase
       .from("restaurants")
@@ -55,6 +57,9 @@ export async function POST(request: NextRequest) {
         delivery_enabled: body.delivery_enabled ?? true,
         pickup_address: body.pickup_address || null,
         is_open: body.is_open ?? true,
+        tax_enabled: taxEnabled,
+        tax_cod_percent: taxEnabled ? body.tax_percent : 0,
+        tax_online_percent: taxEnabled ? body.tax_percent : 0,
       })
       .select()
       .single();

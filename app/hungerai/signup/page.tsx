@@ -21,6 +21,8 @@ export default function SignupPage() {
   const [whatsappNumber, setWhatsappNumber] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [taxEnabled, setTaxEnabled] = useState(false);
+  const [taxPercent, setTaxPercent] = useState("");
 
   const [slugStatus, setSlugStatus] = useState<"idle" | "checking" | "available" | "taken" | "invalid">("idle");
   const [loading, setLoading] = useState(false);
@@ -86,6 +88,8 @@ export default function SignupPage() {
         whatsapp_number: whatsappNumber,
         access_token: signUpData.session?.access_token,
         user_id: signUpData.session ? undefined : signUpData.user.id,
+        tax_enabled: taxEnabled,
+        tax_percent: taxEnabled ? Number(taxPercent) || 0 : 0,
       }),
     });
 
@@ -197,6 +201,43 @@ export default function SignupPage() {
                 onChange={(e) => setWhatsappNumber(e.target.value)}
               />
               <p className="text-xs text-[var(--hai-text-muted)] mt-1.5">Orders will be sent to this number.</p>
+            </div>
+
+            <div className="hai-card p-4">
+              <label className="flex items-center justify-between cursor-pointer">
+                <span className="text-sm font-medium text-[var(--hai-text-primary)]">
+                  Charge tax on orders?
+                </span>
+                <input
+                  type="checkbox"
+                  checked={taxEnabled}
+                  onChange={(e) => setTaxEnabled(e.target.checked)}
+                  className="w-5 h-5 accent-[var(--hai-accent-primary)]"
+                />
+              </label>
+              {taxEnabled ? (
+                <div className="mt-3">
+                  <label className="hai-label">Tax Rate (%)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    step="0.5"
+                    className="hai-input"
+                    placeholder="e.g. 16"
+                    value={taxPercent}
+                    onChange={(e) => setTaxPercent(e.target.value)}
+                  />
+                  <p className="text-xs text-[var(--hai-text-muted)] mt-1.5">
+                    Whatever rate applies to you — 16%, 8%, or any percentage. Applied on top of
+                    every order&apos;s subtotal.
+                  </p>
+                </div>
+              ) : (
+                <p className="text-xs text-[var(--hai-text-muted)] mt-1.5">
+                  No tax will be added to orders — you can turn this on anytime.
+                </p>
+              )}
             </div>
 
             <div>

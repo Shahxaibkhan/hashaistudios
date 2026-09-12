@@ -74,6 +74,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const taxEnabled = !!body.tax_enabled && (body.tax_percent ?? 0) > 0;
+
     const { data: restaurant, error: insertError } = await supabase
       .from("restaurants")
       .insert({
@@ -85,6 +87,9 @@ export async function POST(request: NextRequest) {
         is_open: true,
         delivery_enabled: true,
         pickup_enabled: false,
+        tax_enabled: taxEnabled,
+        tax_cod_percent: taxEnabled ? body.tax_percent : 0,
+        tax_online_percent: taxEnabled ? body.tax_percent : 0,
       })
       .select()
       .single();

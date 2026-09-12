@@ -297,6 +297,8 @@ function AddRestaurantModal({
     pickup_enabled: false,
     delivery_enabled: true,
     pickup_address: "",
+    tax_enabled: false,
+    tax_percent: "",
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -329,6 +331,8 @@ function AddRestaurantModal({
         delivery_enabled: form.delivery_enabled,
         pickup_address: form.pickup_address || null,
         is_open: true,
+        tax_enabled: form.tax_enabled,
+        tax_percent: form.tax_enabled ? Number(form.tax_percent) || 0 : 0,
       }),
     });
 
@@ -502,6 +506,37 @@ function AddRestaurantModal({
               Card on Delivery enabled
             </label>
           </div>
+
+          <div className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              id="tax_enabled"
+              checked={form.tax_enabled}
+              onChange={(e) => setForm({ ...form, tax_enabled: e.target.checked })}
+              className="w-4 h-4 accent-[var(--hai-accent-primary)]"
+            />
+            <label htmlFor="tax_enabled" className="text-sm text-[var(--hai-text-secondary)] cursor-pointer">
+              Charge tax on orders
+            </label>
+          </div>
+
+          {form.tax_enabled && (
+            <div>
+              <label className="block text-sm text-[var(--hai-text-muted)] mb-1">
+                Tax Rate (%)
+              </label>
+              <input
+                type="number"
+                min={0}
+                max={100}
+                step="0.5"
+                className="hai-input"
+                placeholder="e.g. 16"
+                value={form.tax_percent}
+                onChange={(e) => setForm({ ...form, tax_percent: e.target.value })}
+              />
+            </div>
+          )}
 
           <div className="flex gap-6">
             <div className="flex items-center gap-3">
