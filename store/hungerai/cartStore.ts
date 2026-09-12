@@ -15,6 +15,15 @@ function calculateItemTotal(price: number, options: CartItemOption[], qty: numbe
   return (price + optionsDelta) * qty;
 }
 
+// Identifies "the same customization" so repeat adds of an identical
+// item+options combo merge into one line instead of appearing twice.
+function optionsSignature(options: CartItemOption[]): string {
+  return options
+    .map((o) => o.id)
+    .sort()
+    .join(",");
+}
+
 interface CartStore {
   // State
   items: CartItem[];
@@ -44,27 +53,43 @@ export const useCartStore = create<CartStore>()(
       restaurantSlug: null,
 
       addItem: (menuItem, qty, selectedOptions, restaurantSlug) => {
-        const state = get();
+        set((state) => {
+          // Switching restaurants clears the cart first.
+          const baseItems =
+            state.restaurantSlug && state.restaurantSlug !== restaurantSlug ? [] : state.items;
 
-        // If switching restaurants, clear cart first
-        if (state.restaurantSlug && state.restaurantSlug !== restaurantSlug) {
-          set({ items: [], restaurantSlug });
-        }
+          const signature = optionsSignature(selectedOptions);
+          const existingIndex = baseItems.findIndex(
+            (item) => item.menuItemId === menuItem.id && optionsSignature(item.options) === signature
+          );
 
-        const newItem: CartItem = {
-          id: generateCartItemId(),
-          menuItemId: menuItem.id,
-          name: menuItem.name,
-          price: menuItem.price,
-          qty,
-          options: selectedOptions,
-          totalPrice: calculateItemTotal(menuItem.price, selectedOptions, qty),
-        };
+          // Same item + same customization already in the cart — bump its
+          // quantity instead of adding a second, identical-looking line.
+          if (existingIndex !== -1) {
+            const items = baseItems.map((item, idx) => {
+              if (idx !== existingIndex) return item;
+              const newQty = item.qty + qty;
+              return {
+                ...item,
+                qty: newQty,
+                totalPrice: calculateItemTotal(item.price, item.options, newQty),
+              };
+            });
+            return { items, restaurantSlug };
+          }
 
-        set((state) => ({
-          items: [...state.items, newItem],
-          restaurantSlug,
-        }));
+          const newItem: CartItem = {
+            id: generateCartItemId(),
+            menuItemId: menuItem.id,
+            name: menuItem.name,
+            price: menuItem.price,
+            qty,
+            options: selectedOptions,
+            totalPrice: calculateItemTotal(menuItem.price, selectedOptions, qty),
+          };
+
+          return { items: [...baseItems, newItem], restaurantSlug };
+        });
       },
 
       removeItem: (cartItemId) => {
