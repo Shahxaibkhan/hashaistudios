@@ -1194,6 +1194,106 @@
   100%    { width: 0;     opacity: 0; }
 }
 
+/* QR Poster (dashboard QR Codes page) */
+.hungerai .hai-qr-poster {
+  background: var(--hai-bg-card);
+  border: 1px solid var(--hai-border);
+  border-radius: var(--hai-radius-lg);
+  box-shadow: var(--hai-shadow-sm);
+  padding: 20px;
+  text-align: center;
+}
+
+.hungerai .hai-qr-poster-lg {
+  padding: 36px 28px;
+}
+
+.hungerai .hai-qr-poster-logo {
+  height: 24px;
+  width: auto;
+  margin: 0 auto 10px;
+  display: block;
+}
+
+.hungerai .hai-qr-poster-restaurant {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--hai-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
+
+.hungerai .hai-qr-poster-headline {
+  font-family: var(--font-syne), sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--hai-text-primary);
+  margin-bottom: 16px;
+}
+
+.hungerai .hai-qr-poster-qr-wrap {
+  background: white;
+  padding: 14px;
+  border-radius: var(--hai-radius-md);
+  display: inline-block;
+  border: 1px solid var(--hai-border-subtle);
+}
+
+.hungerai .hai-qr-poster-subline {
+  margin-top: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--hai-accent-primary);
+}
+
+.hungerai .hai-qr-poster-footer {
+  margin-top: 10px;
+  font-size: 10px;
+  color: var(--hai-text-dim);
+}
+
+.hungerai .hai-qr-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (min-width: 640px) {
+  .hungerai .hai-qr-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (min-width: 1024px) {
+  .hungerai .hai-qr-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* Print (QR Codes page) */
+@media print {
+  /* The whole /hungerai section is a `position: fixed; overflow: auto`
+     shell (see hungerai/layout.tsx) so the app can act like a native app —
+     but that combination clips print output to a single viewport-sized
+     page. Flatten it back to normal document flow only while printing. */
+  .hungerai {
+    position: static !important;
+    inset: auto !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+  .hungerai .no-print {
+    display: none !important;
+  }
+  .hungerai .hai-qr-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 24px;
+  }
+  .hungerai .hai-qr-poster {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    box-shadow: none;
+    border: 1px dashed #ccc;
+  }
+}
+
 /* ── Landing page specific layout helpers ── */
 .hungerai-landing .feature-icon {
   width: 48px;

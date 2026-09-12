@@ -7,7 +7,8 @@ import { useCartStore } from "@/store/hungerai/cartStore";
 import { createBrowserSupabaseClient } from "@/lib/hungerai/supabase";
 import { buildWaLink } from "@/lib/hungerai/waLink";
 import { loadCheckoutPrefill, saveCheckoutPrefill } from "@/lib/hungerai/checkoutPrefill";
-import type { Restaurant, OrderItem, OrderPayload } from "@/types/hungerai";
+import { loadOrderTypeContext, clearOrderTypeContext } from "@/lib/hungerai/orderTypeContext";
+import type { Restaurant, OrderItem, OrderPayload, OrderType } from "@/types/hungerai";
 import CartReview from "@/components/hungerai/checkout/CartReview";
 import CustomerForm from "@/components/hungerai/checkout/CustomerForm";
 import DeliveryMap from "@/components/hungerai/checkout/DeliveryMap";
@@ -31,7 +32,13 @@ export default function CheckoutPage() {
   const [deliveryLng, setDeliveryLng] = useState<number | null>(null);
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"cod" | "online" | "card">("cod");
-  const [orderType, setOrderType] = useState<"delivery" | "pickup">("delivery");
+  const [orderType, setOrderType] = useState<OrderType>("delivery");
+  const [carPlateNumber, setCarPlateNumber] = useState("");
+  const [carColor, setCarColor] = useState("");
+  const [tableNumber, setTableNumber] = useState("");
+  // Set when the customer arrived via a curbside/table QR — widens which
+  // options OrderTypeToggle shows, beyond the restaurant's normal delivery/pickup config.
+  const [qrOrderType, setQrOrderType] = useState<"curbside" | "dine_in" | null>(null);
 
   // Collapse a section into a compact summary once it's filled in and the
   // customer has moved on — cuts down how much of the page they have to
@@ -51,6 +58,8 @@ export default function CheckoutPage() {
   const nameRef = useRef<HTMLDivElement>(null);
   const addressRef = useRef<HTMLDivElement>(null);
   const locationRef = useRef<HTMLDivElement>(null);
+  const carDetailsRef = useRef<HTMLDivElement>(null);
+  const tableNumberRef = useRef<HTMLDivElement>(null);
 
   // Cart store - always called unconditionally
   const cartStore = useCartStore();
@@ -79,6 +88,17 @@ export default function CheckoutPage() {
       const pickupOnly = !data.delivery_enabled && data.pickup_enabled;
       if (pickupOnly) {
         setOrderType("pickup");
+      }
+
+      // A curbside/table QR overrides the default above — explicit QR
+      // intent wins over the restaurant's general delivery/pickup config.
+      const qrContext = loadOrderTypeContext(slug);
+      if (qrContext) {
+        setQrOrderType(qrContext.orderType);
+        setOrderType(qrContext.orderType);
+        if (qrContext.orderType === "dine_in" && qrContext.tableNumber) {
+          setTableNumber(qrContext.tableNumber);
+        }
       }
 
       // Prefill from a previous order on this device, and collapse any
@@ -139,8 +159,15 @@ export default function CheckoutPage() {
       if (!deliveryAddress.trim()) newErrors.address = "Please enter your delivery address";
       if (!deliveryLat || !deliveryLng) newErrors.location = "Please set your delivery location on the map";
     }
+    if (orderType === "curbside") {
+      if (!carPlateNumber.trim()) newErrors.carPlate = "Car plate number is required";
+      if (!carColor.trim()) newErrors.carColor = "Car color is required";
+    }
+    if (orderType === "dine_in") {
+      if (!tableNumber.trim()) newErrors.tableNumber = "Table number is required";
+    }
     setErrors(newErrors);
-  }, [submitAttempted, customerName, customerWhatsApp, deliveryAddress, deliveryLat, deliveryLng, orderType]);
+  }, [submitAttempted, customerName, customerWhatsApp, deliveryAddress, deliveryLat, deliveryLng, orderType, carPlateNumber, carColor, tableNumber]);
 
   if (orderPlaced) {
     return (
@@ -170,6 +197,17 @@ export default function CheckoutPage() {
   // Calculate delivery info
   const deliveryFee = 0; // Owner will confirm delivery fee via WhatsApp
   const subtotal = cartSubtotal;
+
+  // Delivery/pickup availability follows the restaurant's own config;
+  // curbside/dine-in only ever appear when a QR carried that context in —
+  // there's no per-restaurant toggle for them since a scanned QR is itself
+  // the proof the restaurant deployed that flow.
+  const availableOrderTypes: OrderType[] = [
+    ...(restaurant.delivery_enabled ? (["delivery"] as const) : []),
+    ...(restaurant.pickup_enabled ? (["pickup"] as const) : []),
+    ...(qrOrderType === "curbside" ? (["curbside"] as const) : []),
+    ...(qrOrderType === "dine_in" ? (["dine_in"] as const) : []),
+  ];
 
   const isDetailsComplete = customerName.trim() !== "" && customerWhatsApp.trim() !== "";
   const isLocationComplete = deliveryAddress.trim() !== "" && deliveryLat !== null && deliveryLng !== null;
@@ -202,13 +240,22 @@ export default function CheckoutPage() {
       if (!deliveryAddress.trim()) newErrors.address = "Please enter your delivery address";
       if (!deliveryLat || !deliveryLng) newErrors.location = "Please set your delivery location on the map";
     }
+    if (orderType === "curbside") {
+      if (!carPlateNumber.trim()) newErrors.carPlate = "Car plate number is required";
+      if (!carColor.trim()) newErrors.carColor = "Car color is required";
+    }
+    if (orderType === "dine_in") {
+      if (!tableNumber.trim()) newErrors.tableNumber = "Table number is required";
+    }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       const firstRef = newErrors.name ? nameRef
         : newErrors.whatsapp ? nameRef // WhatsApp lives in the same "Your Details" section
         : newErrors.address ? addressRef
-        : locationRef;
+        : newErrors.location ? locationRef
+        : newErrors.carPlate || newErrors.carColor ? carDetailsRef
+        : tableNumberRef;
       firstRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
@@ -241,7 +288,7 @@ export default function CheckoutPage() {
         customer_whatsapp: formattedWhatsApp,
         items: orderItems,
         subtotal,
-        delivery_fee: orderType === "pickup" ? 0 : deliveryFee,
+        delivery_fee: orderType === "delivery" ? deliveryFee : 0,
         tax_amount: taxAmount,
         total,
         delivery_lat: orderType === "delivery" ? deliveryLat : null,
@@ -249,6 +296,9 @@ export default function CheckoutPage() {
         delivery_address: orderType === "delivery" ? deliveryAddress : "",
         payment_method: paymentMethod,
         order_type: orderType,
+        car_plate_number: orderType === "curbside" ? carPlateNumber.trim() : "",
+        car_color: orderType === "curbside" ? carColor.trim() : "",
+        table_number: orderType === "dine_in" ? tableNumber.trim() : "",
       };
 
       // POST to API
@@ -288,6 +338,9 @@ export default function CheckoutPage() {
         restaurantAddress: restaurant.pickup_address,
         restaurantLat: restaurant.city_lat,
         restaurantLng: restaurant.city_lng,
+        carPlateNumber: orderType === "curbside" ? carPlateNumber.trim() : undefined,
+        carColor: orderType === "curbside" ? carColor.trim() : undefined,
+        tableNumber: orderType === "dine_in" ? tableNumber.trim() : undefined,
         receiptUrl,
       });
 
@@ -299,6 +352,7 @@ export default function CheckoutPage() {
         lat: orderType === "delivery" ? deliveryLat : null,
         lng: orderType === "delivery" ? deliveryLng : null,
       });
+      clearOrderTypeContext(slug);
 
       // Clear cart and show a brief confirmation beat before handing off.
       cartStore.clearCart();
@@ -333,11 +387,11 @@ export default function CheckoutPage() {
           </div>
         )}
 
-        {/* Order Type Toggle — only when both delivery & pickup are enabled */}
-        {restaurant.delivery_enabled && restaurant.pickup_enabled && (
+        {/* Order Type Toggle — only when there's an actual choice to make */}
+        {availableOrderTypes.length > 1 && (
           <section>
             <h2 className="font-display text-lg font-bold mb-3">Order Type</h2>
-            <OrderTypeToggle selected={orderType} onSelect={setOrderType} />
+            <OrderTypeToggle selected={orderType} onSelect={setOrderType} available={availableOrderTypes} />
           </section>
         )}
 
@@ -510,6 +564,76 @@ export default function CheckoutPage() {
           </section>
         )}
 
+        {/* Car Details — only for curbside orders */}
+        {orderType === "curbside" && (
+          <section ref={carDetailsRef}>
+            <h2 className="font-display text-lg font-bold mb-3">Car Details</h2>
+            <div className="hai-card p-4 space-y-4">
+              <div>
+                <label htmlFor="car-plate" className="block text-sm font-medium text-[var(--hai-text-secondary)] mb-2">
+                  Car Plate Number
+                </label>
+                <input
+                  id="car-plate"
+                  type="text"
+                  className={`hai-input ${errors.carPlate ? "border-[var(--hai-accent-red)]" : ""}`}
+                  placeholder="e.g. LEA-1234"
+                  value={carPlateNumber}
+                  onChange={(e) => setCarPlateNumber(e.target.value)}
+                />
+                {errors.carPlate && (
+                  <p className="text-[var(--hai-accent-red)] text-sm mt-1">{errors.carPlate}</p>
+                )}
+              </div>
+              <div>
+                <label htmlFor="car-color" className="block text-sm font-medium text-[var(--hai-text-secondary)] mb-2">
+                  Car Color
+                </label>
+                <input
+                  id="car-color"
+                  type="text"
+                  className={`hai-input ${errors.carColor ? "border-[var(--hai-accent-red)]" : ""}`}
+                  placeholder="e.g. White"
+                  value={carColor}
+                  onChange={(e) => setCarColor(e.target.value)}
+                />
+                {errors.carColor && (
+                  <p className="text-[var(--hai-accent-red)] text-sm mt-1">{errors.carColor}</p>
+                )}
+              </div>
+              <p className="text-sm text-[var(--hai-text-muted)]">
+                We&apos;ll bring your order out to your car — no need to leave it.
+              </p>
+            </div>
+          </section>
+        )}
+
+        {/* Table Number — only for dine-in orders */}
+        {orderType === "dine_in" && (
+          <section ref={tableNumberRef}>
+            <h2 className="font-display text-lg font-bold mb-3">Table Number</h2>
+            <div className="hai-card p-4">
+              <label htmlFor="table-number" className="block text-sm font-medium text-[var(--hai-text-secondary)] mb-2">
+                Table Number
+              </label>
+              <input
+                id="table-number"
+                type="text"
+                className={`hai-input ${errors.tableNumber ? "border-[var(--hai-accent-red)]" : ""}`}
+                placeholder="e.g. 7"
+                value={tableNumber}
+                onChange={(e) => setTableNumber(e.target.value)}
+              />
+              {errors.tableNumber && (
+                <p className="text-[var(--hai-accent-red)] text-sm mt-1">{errors.tableNumber}</p>
+              )}
+              <p className="text-sm text-[var(--hai-text-muted)] mt-2">
+                We&apos;ll bring your order straight to your table.
+              </p>
+            </div>
+          </section>
+        )}
+
         {/* Payment Method */}
         <section>
           <h2 className="font-display text-lg font-bold mb-3">Payment Method</h2>
@@ -531,7 +655,11 @@ export default function CheckoutPage() {
             total={total}
             onPlaceOrder={handlePlaceOrder}
             isSubmitting={submitting}
-            isDisabled={orderType === "delivery" && (!deliveryLat || !deliveryLng)}
+            isDisabled={
+              (orderType === "delivery" && (!deliveryLat || !deliveryLng)) ||
+              (orderType === "curbside" && (!carPlateNumber.trim() || !carColor.trim())) ||
+              (orderType === "dine_in" && !tableNumber.trim())
+            }
             validationErrors={errors}
             orderType={orderType}
           />

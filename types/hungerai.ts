@@ -60,6 +60,10 @@ export interface ItemOption {
   option_type: "radio" | "checkbox";
 }
 
+// Also used by OrderPayload, OrderTypeToggle, OrderSummary, waLink, and the
+// dashboard order card — a single source of truth for the 4 order flows.
+export type OrderType = "delivery" | "pickup" | "curbside" | "dine_in";
+
 export interface Order {
   id: string;
   order_number: number;
@@ -73,7 +77,10 @@ export interface Order {
   delivery_lat: number | null;
   delivery_lng: number | null;
   payment_method: "cod" | "online" | "card";
-  order_type: "delivery" | "pickup";
+  order_type: OrderType;
+  car_plate_number: string | null; // curbside only
+  car_color: string | null;        // curbside only
+  table_number: string | null;     // dine_in only
   wa_sent: boolean;
   created_at: string;
 }
@@ -128,7 +135,10 @@ export interface OrderPayload {
   delivery_lng: number | null;
   delivery_address: string;
   payment_method: "cod" | "online" | "card";
-  order_type: "delivery" | "pickup";
+  order_type: OrderType;
+  car_plate_number: string;
+  car_color: string;
+  table_number: string;
 }
 
 export interface OrderResponse {

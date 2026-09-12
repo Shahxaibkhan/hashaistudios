@@ -45,7 +45,11 @@ export default async function OrderReceiptPage({ params }: ReceiptPageProps) {
     order.payment_method === "cod" ? "Cash on Delivery" :
     order.payment_method === "card" ? "Card on Delivery" : "Online Payment";
 
-  const isPickup = (order as any).order_type === "pickup";
+  const orderType = (order as any).order_type as string;
+  const isPickup = orderType === "pickup";
+  const isDelivery = orderType === "delivery";
+  const isCurbside = orderType === "curbside";
+  const isDineIn = orderType === "dine_in";
 
   const orderedAt = new Date(order.created_at).toLocaleString("en-PK", {
     dateStyle: "medium",
@@ -112,13 +116,15 @@ export default async function OrderReceiptPage({ params }: ReceiptPageProps) {
               <span>{formatPrice((order as any).tax_amount)}</span>
             </div>
           )}
-          <div className="flex justify-between text-[var(--hai-text-secondary)]">
-            <span>Delivery Fee</span>
-            <span className="text-[var(--hai-text-muted)]">To be confirmed</span>
-          </div>
+          {isDelivery && (
+            <div className="flex justify-between text-[var(--hai-text-secondary)]">
+              <span>Delivery Fee</span>
+              <span className="text-[var(--hai-text-muted)]">To be confirmed</span>
+            </div>
+          )}
           <div className="flex justify-between font-bold text-[var(--hai-text-primary)] text-base pt-1 border-t border-[var(--hai-border-subtle)]">
             <span>Total</span>
-            <span>{formatPrice(order.total)}+</span>
+            <span>{formatPrice(order.total)}{isDelivery ? "+" : ""}</span>
           </div>
         </div>
 
@@ -166,13 +172,13 @@ export default async function OrderReceiptPage({ params }: ReceiptPageProps) {
           )}
 
           {/* Delivery info */}
-          {!isPickup && order.delivery_address && (
+          {isDelivery && order.delivery_address && (
             <div className="flex items-start gap-2 text-[var(--hai-text-primary)]">
               <span>📍</span>
               <span>{order.delivery_address}</span>
             </div>
           )}
-          {!isPickup && mapsLink && (
+          {isDelivery && mapsLink && (
             <a
               href={mapsLink}
               target="_blank"
@@ -181,6 +187,36 @@ export default async function OrderReceiptPage({ params }: ReceiptPageProps) {
             >
               🗺️ View on Google Maps
             </a>
+          )}
+
+          {/* Curbside info */}
+          {isCurbside && (
+            <div className="mt-3 pt-3 border-t border-[var(--hai-border-subtle)] space-y-2">
+              <div className="flex items-center gap-2">
+                <span>🚗</span>
+                <span className="font-semibold text-[var(--hai-text-primary)]">Curbside pickup — we&apos;ll bring it to your car</span>
+              </div>
+              <div className="flex items-center gap-2 text-[var(--hai-text-primary)]">
+                <span>🚘</span>
+                <span>Plate: {(order as any).car_plate_number || "Not provided"}</span>
+              </div>
+              <div className="flex items-center gap-2 text-[var(--hai-text-primary)]">
+                <span>🎨</span>
+                <span>Color: {(order as any).car_color || "Not provided"}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Dine-in info */}
+          {isDineIn && (
+            <div className="mt-3 pt-3 border-t border-[var(--hai-border-subtle)]">
+              <div className="flex items-center gap-2">
+                <span>🍽️</span>
+                <span className="font-semibold text-[var(--hai-text-primary)]">
+                  Dine-in — Table {(order as any).table_number || "?"}
+                </span>
+              </div>
+            </div>
           )}
         </div>
 

@@ -1,5 +1,7 @@
 "use client";
 
+import type { OrderType } from "@/types/hungerai";
+
 interface OrderSummaryProps {
   subtotal: number;
   deliveryFee: number;
@@ -10,7 +12,7 @@ interface OrderSummaryProps {
   isSubmitting: boolean;
   isDisabled: boolean;
   validationErrors?: Record<string, string>;
-  orderType?: "delivery" | "pickup";
+  orderType?: OrderType;
 }
 
 const ERROR_LABELS: Record<string, string> = {
@@ -18,6 +20,9 @@ const ERROR_LABELS: Record<string, string> = {
   whatsapp: "WhatsApp Number",
   address: "Delivery Address",
   location: "Delivery Pin",
+  carPlate: "Car Plate Number",
+  carColor: "Car Color",
+  tableNumber: "Table Number",
 };
 
 export default function OrderSummary({

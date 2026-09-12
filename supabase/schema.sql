@@ -77,7 +77,10 @@ create table orders (
   delivery_lng double precision,
   delivery_address text,                        -- house #, street, area, city
   payment_method text default 'cod',            -- 'cod', 'online', or 'card'
-  order_type text default 'delivery',           -- 'delivery' or 'pickup'
+  order_type text default 'delivery',           -- 'delivery', 'pickup', 'curbside', or 'dine_in'
+  car_plate_number text,                        -- curbside only
+  car_color text,                               -- curbside only
+  table_number text,                            -- dine_in only
   wa_sent boolean default false,                -- true once customer redirected to WA
   created_at timestamptz default now()
 );

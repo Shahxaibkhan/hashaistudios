@@ -8,7 +8,7 @@
  * Bold text in WhatsApp uses *text*
  */
 
-import type { OrderItem } from "@/types/hungerai";
+import type { OrderItem, OrderType } from "@/types/hungerai";
 
 export interface WaLinkParams {
   orderNumber: number;
@@ -25,10 +25,13 @@ export interface WaLinkParams {
   taxRate: number;
   total: number;
   paymentMethod: "cod" | "online" | "card";
-  orderType: "delivery" | "pickup";
+  orderType: OrderType;
   restaurantAddress: string | null; // for pickup: restaurant's text address
   restaurantLat: number;            // for pickup: restaurant's map pin
   restaurantLng: number;
+  carPlateNumber?: string; // curbside only
+  carColor?: string;       // curbside only
+  tableNumber?: string;    // dine_in only
   receiptUrl?: string;
 }
 
@@ -98,6 +101,9 @@ export function buildOrderMessage(params: WaLinkParams): string {
     restaurantAddress,
     restaurantLat,
     restaurantLng,
+    carPlateNumber,
+    carColor,
+    tableNumber,
     receiptUrl,
   } = params;
 
@@ -113,6 +119,10 @@ export function buildOrderMessage(params: WaLinkParams): string {
   if (orderType === "pickup") {
     const restaurantMapsLink = `https://maps.google.com/?q=${restaurantLat},${restaurantLng}`;
     locationBlock = `🏃 *Pickup order* — ready in ~30–40 min\n📍 Pick up from: ${restaurantAddress || "our location"}\n${restaurantMapsLink}`;
+  } else if (orderType === "curbside") {
+    locationBlock = `🚗 *Curbside pickup* — we'll bring it out to your car\n🚘 Plate: ${carPlateNumber || "Not provided"}\n🎨 Color: ${carColor || "Not provided"}`;
+  } else if (orderType === "dine_in") {
+    locationBlock = `🍽️ *Dine-in* — Table ${tableNumber || "?"}\nWe'll bring the order to your table`;
   } else {
     const customerMapsLink =
       deliveryLat && deliveryLng

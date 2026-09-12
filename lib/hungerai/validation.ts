@@ -13,21 +13,41 @@ export const orderItemSchema = z.object({
   options: z.array(orderItemOptionSchema).max(20).default([]),
 });
 
-export const orderPayloadSchema = z.object({
-  restaurant_id: z.string().uuid(),
-  customer_name: z.string().trim().min(1).max(120),
-  customer_whatsapp: z.string().trim().min(1).max(20),
-  items: z.array(orderItemSchema).min(1).max(50),
-  subtotal: z.number().finite().optional(), // ignored server-side, kept for backward compat
-  delivery_fee: z.number().finite().min(0).max(100000).default(0),
-  tax_amount: z.number().finite().optional(), // ignored server-side
-  total: z.number().finite().optional(), // ignored server-side
-  delivery_lat: z.number().finite().nullable().optional(),
-  delivery_lng: z.number().finite().nullable().optional(),
-  delivery_address: z.string().max(500).optional().default(""),
-  payment_method: z.enum(["cod", "online", "card"]),
-  order_type: z.enum(["delivery", "pickup"]).default("delivery"),
-});
+export const orderPayloadSchema = z
+  .object({
+    restaurant_id: z.string().uuid(),
+    customer_name: z.string().trim().min(1).max(120),
+    customer_whatsapp: z.string().trim().min(1).max(20),
+    items: z.array(orderItemSchema).min(1).max(50),
+    subtotal: z.number().finite().optional(), // ignored server-side, kept for backward compat
+    delivery_fee: z.number().finite().min(0).max(100000).default(0),
+    tax_amount: z.number().finite().optional(), // ignored server-side
+    total: z.number().finite().optional(), // ignored server-side
+    delivery_lat: z.number().finite().nullable().optional(),
+    delivery_lng: z.number().finite().nullable().optional(),
+    delivery_address: z.string().max(500).optional().default(""),
+    payment_method: z.enum(["cod", "online", "card"]),
+    order_type: z.enum(["delivery", "pickup", "curbside", "dine_in"]).default("delivery"),
+    car_plate_number: z.string().trim().max(20).optional().default(""),
+    car_color: z.string().trim().max(40).optional().default(""),
+    table_number: z.string().trim().max(20).optional().default(""),
+  })
+  .superRefine((data, ctx) => {
+    // Car plate/color and table number are how staff physically locate the
+    // customer — unlike a delivery address, there's no fallback of a human
+    // dispatcher asking over WhatsApp, so these are enforced server-side too.
+    if (data.order_type === "curbside") {
+      if (!data.car_plate_number) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["car_plate_number"], message: "Car plate number is required for curbside orders" });
+      }
+      if (!data.car_color) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["car_color"], message: "Car color is required for curbside orders" });
+      }
+    }
+    if (data.order_type === "dine_in" && !data.table_number) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["table_number"], message: "Table number is required for dine-in orders" });
+    }
+  });
 
 export type OrderPayloadInput = z.infer<typeof orderPayloadSchema>;
 

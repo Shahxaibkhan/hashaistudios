@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createBrowserSupabaseClient } from "@/lib/hungerai/supabase";
+import { ORDER_TYPE_META } from "@/lib/hungerai/orderTypes";
 import type { Order } from "@/types/hungerai";
 
 type FilterType = "today" | "week" | "all";
@@ -182,11 +183,14 @@ function OrderCard({ order }: { order: Order }) {
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className="font-display font-bold text-lg">
               #{order.order_number}
             </span>
             <span className="text-sm text-[var(--hai-text-muted)]">{timeAgo}</span>
+            <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--hai-bg-elevated)] text-[var(--hai-text-secondary)]">
+              {ORDER_TYPE_META[order.order_type ?? "delivery"].emoji} {ORDER_TYPE_META[order.order_type ?? "delivery"].label}
+            </span>
           </div>
           <p className="text-xs text-[var(--hai-text-muted)]">{formattedDate}</p>
         </div>
@@ -227,6 +231,19 @@ function OrderCard({ order }: { order: Order }) {
         </div>
       </div>
 
+      {/* Curbside / Dine-in identifying details — the whole point of these
+          order types is staff being able to spot the right car/table. */}
+      {order.order_type === "curbside" && (order.car_plate_number || order.car_color) && (
+        <div className="mb-3 pb-3 border-b border-[var(--hai-border-subtle)] flex items-center gap-2 text-sm font-semibold text-[var(--hai-accent-amber)]">
+          🚗 Plate: {order.car_plate_number || "—"} · Color: {order.car_color || "—"}
+        </div>
+      )}
+      {order.order_type === "dine_in" && order.table_number && (
+        <div className="mb-3 pb-3 border-b border-[var(--hai-border-subtle)] flex items-center gap-2 text-sm font-semibold text-[var(--hai-accent-primary)]">
+          🍽️ Table {order.table_number}
+        </div>
+      )}
+
       {/* Items */}
       <div className="space-y-1">
         {items.map((item, idx) => (
@@ -250,10 +267,12 @@ function OrderCard({ order }: { order: Order }) {
           <span>Subtotal</span>
           <span>Rs {order.subtotal.toLocaleString("en-PK")}</span>
         </div>
-        <div className="flex justify-between text-[var(--hai-text-muted)]">
-          <span>Delivery</span>
-          <span>Rs {order.delivery_fee.toLocaleString("en-PK")}</span>
-        </div>
+        {order.order_type === "delivery" && (
+          <div className="flex justify-between text-[var(--hai-text-muted)]">
+            <span>Delivery</span>
+            <span>Rs {order.delivery_fee.toLocaleString("en-PK")}</span>
+          </div>
+        )}
       </div>
 
       {/* WhatsApp Status */}

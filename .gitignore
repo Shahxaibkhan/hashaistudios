@@ -45,3 +45,5 @@ coverage/
 
 # Prisma generated (generated at build time)
 prisma/*.db
+.vercel
+.env*

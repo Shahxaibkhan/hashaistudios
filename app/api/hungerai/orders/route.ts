@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
       itemOptions: itemOptions ?? [],
       restaurant: restaurant as Restaurant,
       paymentMethod: body.payment_method,
-      deliveryFee: body.order_type === "pickup" ? 0 : body.delivery_fee,
+      deliveryFee: body.order_type !== "delivery" ? 0 : body.delivery_fee,
     });
 
     if (!pricing.ok) {
@@ -115,6 +115,9 @@ export async function POST(request: NextRequest) {
         delivery_address: body.delivery_address,
         payment_method: body.payment_method,
         order_type: body.order_type,
+        car_plate_number: body.car_plate_number || null,
+        car_color: body.car_color || null,
+        table_number: body.table_number || null,
         wa_sent: true,
         ...(clientIp !== "unknown" && { client_ip: clientIp }),
       })

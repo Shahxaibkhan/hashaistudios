@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ type?: string; table?: string }>;
 }
 
 async function getRestaurantWithMenu(slug: string): Promise<RestaurantWithMenu | null> {
@@ -90,8 +91,9 @@ export async function generateMetadata({ params }: PageProps) {
   };
 }
 
-export default async function RestaurantMenuPage({ params }: PageProps) {
+export default async function RestaurantMenuPage({ params, searchParams }: PageProps) {
   const { slug } = await params;
+  const { type: qrOrderType, table: qrTableNumber } = await searchParams;
   const restaurant = await getRestaurantWithMenu(slug);
 
   if (!restaurant) {
@@ -157,9 +159,15 @@ export default async function RestaurantMenuPage({ params }: PageProps) {
   }
   // If no timing set, keep is_open as-is from the database
 
-  return <MenuPage restaurant={{
-    ...restaurant,
-    opening_time: restaurant.opening_time ?? null,
-    closing_time: restaurant.closing_time ?? null,
-  }} />;
+  return (
+    <MenuPage
+      restaurant={{
+        ...restaurant,
+        opening_time: restaurant.opening_time ?? null,
+        closing_time: restaurant.closing_time ?? null,
+      }}
+      qrOrderType={qrOrderType}
+      qrTableNumber={qrTableNumber}
+    />
+  );
 }

@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import type { RestaurantWithMenu, MenuItemWithOptions, CartItemOption } from "@/types/hungerai";
 import { useRestaurantCart } from "@/store/hungerai/cartStore";
+import { saveOrderTypeContext } from "@/lib/hungerai/orderTypeContext";
 import CategoryTabs from "./CategoryTabs";
 import ItemCard from "./ItemCard";
 import ItemSheet from "./ItemSheet";
@@ -12,6 +13,8 @@ import HungerAISplash from "./HungerAISplash";
 
 interface MenuPageProps {
   restaurant: RestaurantWithMenu;
+  qrOrderType?: string;
+  qrTableNumber?: string;
 }
 
 // Convert "14:30" → "2:30 PM"
@@ -22,9 +25,9 @@ function formatTime(time: string): string {
   return `${hour}:${String(m).padStart(2, "0")} ${ampm}`;
 }
 
-export default function MenuPage({ restaurant }: MenuPageProps) {
+export default function MenuPage({ restaurant, qrOrderType, qrTableNumber }: MenuPageProps) {
   // Splash screen shown on every restaurant page load
-  
+
   const [activeCategory, setActiveCategory] = useState<string | null>(
     restaurant.categories[0]?.id || null
   );
@@ -33,6 +36,20 @@ export default function MenuPage({ restaurant }: MenuPageProps) {
   const categoryRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const cart = useRestaurantCart(restaurant.slug);
+
+  // A curbside/table QR carries its context here via a URL param — capture
+  // it once, then clean the URL so it doesn't linger in the address bar.
+  useEffect(() => {
+    if (qrOrderType === "curbside" || qrOrderType === "dine_in") {
+      saveOrderTypeContext({
+        slug: restaurant.slug,
+        orderType: qrOrderType,
+        tableNumber: qrOrderType === "dine_in" ? (qrTableNumber ?? "") : "",
+      });
+      window.history.replaceState(null, "", `/hungerai/${restaurant.slug}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Scroll to category section
   const scrollToCategory = (categoryId: string) => {
