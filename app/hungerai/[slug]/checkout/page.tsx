@@ -52,7 +52,7 @@ export default function CheckoutPage() {
     const fetchRestaurant = async () => {
       const supabase = createBrowserSupabaseClient();
       const { data, error } = await supabase
-        .from("restaurants")
+        .from("restaurants_public")
         .select("*")
         .eq("slug", slug)
         .single();
@@ -196,27 +196,30 @@ export default function CheckoutPage() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to create order");
+        const errBody = await response.json().catch(() => null);
+        throw new Error(errBody?.error || "Failed to create order");
       }
 
-      const { order_number, id: orderId } = await response.json();
+      const confirmed = await response.json();
+      const { order_number, id: orderId } = confirmed;
 
-      // Build WhatsApp link
+      // Build WhatsApp link using the server-confirmed pricing/items —
+      // never the client-computed values, in case they diverged.
       const receiptUrl = `https://hashaistudios.com/hungerai/${slug}/order/${orderId}`;
       const waUrl = buildWaLink({
         orderNumber: order_number,
         restaurantWhatsApp: restaurant.whatsapp_number,
-        items: orderItems,
+        items: confirmed.items ?? orderItems,
         customerName,
         customerWhatsApp: formattedWhatsApp,
         deliveryLat: orderType === "delivery" ? deliveryLat : null,
         deliveryLng: orderType === "delivery" ? deliveryLng : null,
         deliveryAddress: orderType === "delivery" ? deliveryAddress : "",
-        subtotal,
-        deliveryFee,
-        taxAmount,
-        taxRate,
-        total,
+        subtotal: confirmed.subtotal ?? subtotal,
+        deliveryFee: confirmed.delivery_fee ?? deliveryFee,
+        taxAmount: confirmed.tax_amount ?? taxAmount,
+        taxRate: confirmed.tax_rate ?? taxRate,
+        total: confirmed.total ?? total,
         paymentMethod,
         orderType,
         restaurantAddress: restaurant.pickup_address,
@@ -237,7 +240,7 @@ export default function CheckoutPage() {
       }, 1500);
     } catch (err) {
       console.error("Order error:", err);
-      setError("Failed to place order. Please try again.");
+      setError(err instanceof Error ? err.message : "Failed to place order. Please try again.");
       setSubmitting(false);
     }
   };

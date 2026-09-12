@@ -25,7 +25,7 @@ export default async function OrderReceiptPage({ params }: ReceiptPageProps) {
       .eq("id", id)
       .single(),
     supabase
-      .from("restaurants")
+      .from("restaurants_public")
       .select("id, name, logo_url, slug, city_lat, city_lng, pickup_address")
       .eq("slug", slug)
       .single(),

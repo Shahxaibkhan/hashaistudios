@@ -19,7 +19,7 @@ function ConfirmationContent({ slug }: { slug: string }) {
     const fetchRestaurant = async () => {
       const supabase = createBrowserSupabaseClient();
       const { data } = await supabase
-        .from("restaurants")
+        .from("restaurants_public")
         .select("*")
         .eq("slug", slug)
         .single();

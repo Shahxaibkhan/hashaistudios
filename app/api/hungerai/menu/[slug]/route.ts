@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSimpleServerClient } from "@/lib/hungerai/supabase";
 import type { RestaurantWithMenu, CategoryWithItems, MenuItemWithOptions } from "@/types/hungerai";
 
+// Force fresh data on every request — avoid caching stale prices/is_open
+export const dynamic = "force-dynamic";
+
 interface RouteParams {
   params: Promise<{ slug: string }>;
 }
@@ -13,7 +16,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     // Fetch restaurant
     const { data: restaurant, error: restaurantError } = await supabase
-      .from("restaurants")
+      .from("restaurants_public")
       .select("*")
       .eq("slug", slug)
       .single();

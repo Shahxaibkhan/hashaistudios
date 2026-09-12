@@ -5,8 +5,6 @@ import { useRouter } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/hungerai/supabase";
 import type { Restaurant } from "@/types/hungerai";
 
-const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL || "";
-
 type SubStatus = "trial" | "active" | "expired" | "suspended";
 type SubPlan = "starter" | "boost" | "pro";
 
@@ -36,26 +34,28 @@ export default function AdminPage() {
         return;
       }
 
-      // Check if admin
-      if (session.user.email !== ADMIN_EMAIL) {
+      // Server verifies admin status — a 401/403 here means "not admin",
+      // regardless of what the client thinks.
+      const response = await fetch("/api/hungerai/restaurants");
+      if (!response.ok) {
         router.push("/hungerai/login");
         return;
       }
 
       setIsAdmin(true);
-
-      // Fetch all restaurants
-      const { data } = await supabase
-        .from("restaurants")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      setRestaurants((data || []) as Restaurant[]);
+      setRestaurants((await response.json()) as Restaurant[]);
       setLoading(false);
     };
 
     checkAdmin();
   }, [router]);
+
+  const refetchRestaurants = async () => {
+    const response = await fetch("/api/hungerai/restaurants");
+    if (response.ok) {
+      setRestaurants((await response.json()) as Restaurant[]);
+    }
+  };
 
   if (loading) {
     return (
@@ -255,7 +255,7 @@ export default function AdminPage() {
           onClose={() => setShowAddModal(false)}
           onSave={() => {
             setShowAddModal(false);
-            window.location.reload();
+            refetchRestaurants();
           }}
         />
       )}
@@ -267,7 +267,7 @@ export default function AdminPage() {
           onClose={() => setSubModal(null)}
           onSave={() => {
             setSubModal(null);
-            window.location.reload();
+            refetchRestaurants();
           }}
         />
       )}
@@ -310,28 +310,31 @@ function AddRestaurantModal({
     setSaving(true);
     setError(null);
 
-    const supabase = createBrowserSupabaseClient();
-
-    const { error: insertError } = await supabase.from("restaurants").insert({
-      slug: form.slug.toLowerCase().replace(/[^a-z0-9-]/g, "-"),
-      name: form.name,
-      whatsapp_number: form.whatsapp_number.replace(/\D/g, ""),
-      owner_email: form.owner_email || null,
-      city_lat: parseFloat(form.city_lat),
-      city_lng: parseFloat(form.city_lng),
-      delivery_base_fee: parseInt(form.delivery_base_fee),
-      delivery_fee_per_km: parseInt(form.delivery_fee_per_km),
-      delivery_radius_km: parseInt(form.delivery_radius_km),
-      online_payment_details: form.online_payment_details || null,
-      card_on_delivery_enabled: form.card_on_delivery_enabled,
-      pickup_enabled: form.pickup_enabled,
-      delivery_enabled: form.delivery_enabled,
-      pickup_address: form.pickup_address || null,
-      is_open: true,
+    const response = await fetch("/api/hungerai/restaurants", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        slug: form.slug.toLowerCase().replace(/[^a-z0-9-]/g, "-"),
+        name: form.name,
+        whatsapp_number: form.whatsapp_number.replace(/\D/g, ""),
+        owner_email: form.owner_email || null,
+        city_lat: parseFloat(form.city_lat),
+        city_lng: parseFloat(form.city_lng),
+        delivery_base_fee: parseInt(form.delivery_base_fee),
+        delivery_fee_per_km: parseInt(form.delivery_fee_per_km),
+        delivery_radius_km: parseInt(form.delivery_radius_km),
+        online_payment_details: form.online_payment_details || null,
+        card_on_delivery_enabled: form.card_on_delivery_enabled,
+        pickup_enabled: form.pickup_enabled,
+        delivery_enabled: form.delivery_enabled,
+        pickup_address: form.pickup_address || null,
+        is_open: true,
+      }),
     });
 
-    if (insertError) {
-      setError(insertError.message);
+    if (!response.ok) {
+      const body = await response.json().catch(() => null);
+      setError(body?.error || "Failed to create restaurant");
       setSaving(false);
       return;
     }
@@ -600,26 +603,20 @@ function SubscriptionModal({
   const handleSave = async () => {
     setSaving(true);
     setError(null);
-    const supabase = createBrowserSupabaseClient();
 
-    // Compute new expiry: extend from today or from existing expiry (whichever is later)
-    const base = r.subscription_expires_at && new Date(r.subscription_expires_at) > new Date()
-      ? new Date(r.subscription_expires_at)
-      : new Date();
-    const newExpiry = new Date(base);
-    newExpiry.setMonth(newExpiry.getMonth() + months);
+    const response = await fetch(`/api/hungerai/admin/restaurants/${restaurant.id}/subscription`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        subscription_status: status,
+        subscription_plan: status === "active" ? plan : null,
+        months,
+      }),
+    });
 
-    const { error: updateError } = await supabase
-      .from("restaurants")
-      .update({
-        subscription_status: status === "trial" || status === "suspended" ? status : "active",
-        subscription_plan: status === "trial" || status === "suspended" ? null : plan,
-        subscription_expires_at: status === "active" ? newExpiry.toISOString() : null,
-      })
-      .eq("id", restaurant.id);
-
-    if (updateError) {
-      setError(updateError.message);
+    if (!response.ok) {
+      const body = await response.json().catch(() => null);
+      setError(body?.error || "Failed to update subscription");
       setSaving(false);
       return;
     }

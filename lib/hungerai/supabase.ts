@@ -1,4 +1,4 @@
-import { createBrowserClient, createServerClient } from "@supabase/ssr";
+import { createBrowserClient } from "@supabase/ssr";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
 // Environment variables
@@ -9,6 +9,13 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 /**
  * Browser client for client components
  * Use this in components with "use client" directive
+ *
+ * NOTE: this file must stay free of server-only imports (e.g. `next/headers`)
+ * — it's imported directly by many "use client" components (HungerAI and
+ * CarPect alike), and bundling `next/headers` into a client component breaks
+ * the build. The cookie-aware server client lives in `./supabaseServer`
+ * instead, in its own file, imported only from Server Components/Route
+ * Handlers.
  */
 export function createBrowserSupabaseClient(): SupabaseClient {
   return createBrowserClient(supabaseUrl, supabaseAnonKey);

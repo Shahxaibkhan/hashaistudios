@@ -1,49 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminSupabaseClient } from "@/lib/hungerai/supabase";
-
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+import { requireAdmin } from "@/lib/hungerai/adminAuth";
+import { validateSlugFormat, checkSlugAvailable } from "@/lib/hungerai/restaurantValidation";
+import { restaurantCreateSchema } from "@/lib/hungerai/validation";
 
 export async function POST(request: NextRequest) {
   try {
-    // Simple admin check via header (in production, use proper auth)
-    // For now, check for admin email in authorization header
-    const authHeader = request.headers.get("authorization");
-
-    if (!ADMIN_EMAIL || authHeader !== `Bearer ${ADMIN_EMAIL}`) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+    const admin = await requireAdmin();
+    if (!admin) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await request.json();
-
-    // Validate required fields
-    if (!body.slug || !body.name || !body.whatsapp_number) {
+    const rawBody = await request.json();
+    const parsed = restaurantCreateSchema.safeParse(rawBody);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "Missing required fields: slug, name, whatsapp_number" },
+        { error: "Invalid restaurant payload", details: parsed.error.flatten() },
         { status: 400 }
       );
     }
+    const body = parsed.data;
 
-    // Validate slug format (lowercase, alphanumeric, hyphens only)
-    if (!/^[a-z0-9-]+$/.test(body.slug)) {
-      return NextResponse.json(
-        { error: "Slug must be lowercase alphanumeric with hyphens only" },
-        { status: 400 }
-      );
+    const slugError = validateSlugFormat(body.slug);
+    if (slugError) {
+      return NextResponse.json({ error: slugError }, { status: 400 });
     }
 
     const supabase = createAdminSupabaseClient();
 
-    // Check if slug already exists
-    const { data: existing } = await supabase
-      .from("restaurants")
-      .select("id")
-      .eq("slug", body.slug)
-      .single();
-
-    if (existing) {
+    if (!(await checkSlugAvailable(supabase, body.slug))) {
       return NextResponse.json(
         { error: "Restaurant with this slug already exists" },
         { status: 409 }
@@ -59,12 +44,16 @@ export async function POST(request: NextRequest) {
         whatsapp_number: body.whatsapp_number,
         logo_url: body.logo_url || null,
         owner_email: body.owner_email || null,
-        delivery_base_fee: body.delivery_base_fee || 50,
-        delivery_fee_per_km: body.delivery_fee_per_km || 20,
-        delivery_radius_km: body.delivery_radius_km || 10,
-        city_lat: body.city_lat || 31.5204,
-        city_lng: body.city_lng || 74.3587,
+        delivery_base_fee: body.delivery_base_fee ?? 50,
+        delivery_fee_per_km: body.delivery_fee_per_km ?? 20,
+        delivery_radius_km: body.delivery_radius_km ?? 10,
+        city_lat: body.city_lat ?? 31.5204,
+        city_lng: body.city_lng ?? 74.3587,
         online_payment_details: body.online_payment_details || null,
+        card_on_delivery_enabled: body.card_on_delivery_enabled ?? false,
+        pickup_enabled: body.pickup_enabled ?? false,
+        delivery_enabled: body.delivery_enabled ?? true,
+        pickup_address: body.pickup_address || null,
         is_open: body.is_open ?? true,
       })
       .select()
@@ -88,16 +77,11 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    // Simple admin check
-    const authHeader = request.headers.get("authorization");
-
-    if (!ADMIN_EMAIL || authHeader !== `Bearer ${ADMIN_EMAIL}`) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+    const admin = await requireAdmin();
+    if (!admin) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const supabase = createAdminSupabaseClient();

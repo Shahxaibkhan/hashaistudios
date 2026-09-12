@@ -4,8 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/hungerai/supabase";
 
-const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL || "";
-
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -31,8 +29,10 @@ export default function LoginPage() {
       return;
     }
 
-    // Redirect admin to admin panel, others to dashboard
-    if (data.user?.email === ADMIN_EMAIL) {
+    // Ask the server whether this session belongs to the platform admin —
+    // never decide that from a client-visible value.
+    const adminCheck = await fetch("/api/hungerai/restaurants");
+    if (adminCheck.ok) {
       router.push("/hungerai/admin");
     } else {
       router.push("/hungerai/dashboard");
@@ -145,6 +145,15 @@ export default function LoginPage() {
 
         {/* Footer */}
         <p className="text-center text-[var(--hai-text-muted)] text-sm mt-8">
+          New restaurant?{" "}
+          <a
+            href="/hungerai/signup"
+            className="text-[var(--hai-accent-primary)] hover:underline font-medium"
+          >
+            Create an account
+          </a>
+        </p>
+        <p className="text-center text-[var(--hai-text-muted)] text-sm mt-2">
           Need help?{" "}
           <a
             href="mailto:support@hashaistudios.com"

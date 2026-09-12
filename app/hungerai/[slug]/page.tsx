@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { createSimpleServerClient } from "@/lib/hungerai/supabase";
+import { createAdminSupabaseClient, createSimpleServerClient } from "@/lib/hungerai/supabase";
 import type { RestaurantWithMenu, CategoryWithItems, MenuItemWithOptions } from "@/types/hungerai";
 import MenuPage from "@/components/hungerai/customer/MenuPage";
 
@@ -11,11 +11,23 @@ interface PageProps {
 }
 
 async function getRestaurantWithMenu(slug: string): Promise<RestaurantWithMenu | null> {
-  const supabase = createSimpleServerClient();
+  // This page needs subscription_status/subscription_expires_at (private
+  // columns, not on restaurants_public) to gate access, so it reads the base
+  // table via the admin client — safe here since it only ever runs server-side.
+  // Falls back to the public view (no subscription gating) if the service
+  // role key isn't configured, matching the fail-open pattern used elsewhere.
+  let supabase;
+  let usingAdminClient = true;
+  try {
+    supabase = createAdminSupabaseClient();
+  } catch {
+    supabase = createSimpleServerClient();
+    usingAdminClient = false;
+  }
 
   // Fetch restaurant
   const { data: restaurant, error: restaurantError } = await supabase
-    .from("restaurants")
+    .from(usingAdminClient ? "restaurants" : "restaurants_public")
     .select("*")
     .eq("slug", slug)
     .single();
