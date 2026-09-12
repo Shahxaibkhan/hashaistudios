@@ -7,11 +7,12 @@ export default async function CarPectVehiclesPage() {
   const { data: { user } } = await supabase.auth.getUser()
   const userId = user!.id
 
-  const { data: vehicles } = await supabase
+  const { data: vehiclesData } = await supabase
     .from('carpect_vehicles')
     .select('*, inspections:carpect_inspections(count)')
     .eq('owner_id', userId)
     .order('created_at', { ascending: false })
+  const vehicles = vehiclesData ?? []
 
   return (
     <div>

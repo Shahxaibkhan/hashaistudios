@@ -8,11 +8,12 @@ export default async function CarPectInspectionsPage() {
   const { data: { user } } = await supabase.auth.getUser()
   const userId = user!.id
 
-  const { data: inspections } = await supabase
+  const { data: inspectionsData } = await supabase
     .from('carpect_inspections')
     .select('*, vehicle:carpect_vehicles(*), damages:carpect_damages(*)')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
+  const inspections = inspectionsData ?? []
 
   return (
     <div>

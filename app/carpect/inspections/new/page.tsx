@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Loader2 } from 'lucide-react'
@@ -8,7 +8,7 @@ import toast from 'react-hot-toast'
 interface Vehicle { id: string; make: string; model: string; year: number; licensePlate: string }
 interface Inspection { id: string; type: string; status: string; createdAt: string }
 
-export default function CarPectNewInspectionPage() {
+function CarPectNewInspectionForm() {
   const router = useRouter()
   const params = useSearchParams()
   const [loading, setLoading] = useState(false)
@@ -168,5 +168,13 @@ export default function CarPectNewInspectionPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function CarPectNewInspectionPage() {
+  return (
+    <Suspense fallback={null}>
+      <CarPectNewInspectionForm />
+    </Suspense>
   )
 }

@@ -125,7 +125,7 @@ export default async function CarPectInspectionDetailPage({ params }: { params: 
               </h2>
               <div className="space-y-3">
                 {(inspection.damages as Array<{ id: string; severity: string; type: string; location: string; description: string; is_new: boolean; estimated_cost?: number }>).map(d => (
-                  <div key={d.id} className={`p-3.5 rounded-lg border ${d.isNew ? 'border-red-200 bg-red-50' : 'border-gray-100 bg-gray-50'}`}>
+                  <div key={d.id} className={`p-3.5 rounded-lg border ${d.is_new ? 'border-red-200 bg-red-50' : 'border-gray-100 bg-gray-50'}`}>
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">

@@ -8,7 +8,7 @@ const nav = [
   { href: '/carpect/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/carpect/vehicles', label: 'Vehicles', icon: Car },
   { href: '/carpect/inspections', label: 'Inspections', icon: ClipboardList },
-]
+] as const
 
 export default function CarPectSidebar({ user }: { user: { name?: string | null; email?: string | null } }) {
   const pathname = usePathname()
