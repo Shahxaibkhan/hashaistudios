@@ -36,7 +36,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         .from("restaurants")
         .select("*")
         .eq("owner_email", session.user.email)
-        .single();
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .maybeSingle();
 
       if (error || !restaurantData) {
         setLoading(false);

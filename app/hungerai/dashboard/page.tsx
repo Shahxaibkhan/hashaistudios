@@ -38,7 +38,9 @@ export default function DashboardHomePage() {
         .from("restaurants")
         .select("*")
         .eq("owner_email", session.user.email)
-        .single();
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .maybeSingle();
 
       if (!restaurantData) return;
       setRestaurant(restaurantData as Restaurant);
