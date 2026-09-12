@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import type { MenuItemWithOptions } from "@/types/hungerai";
 
 interface ItemCardProps {
@@ -24,8 +25,19 @@ export default function ItemCard({ item, isOpen, onClick, onQuickAdd }: ItemCard
     >
       {/* Item Details */}
       <div className="flex justify-between items-start gap-3">
+        {item.image_url && (
+          <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-[var(--hai-bg-elevated)]">
+            <Image
+              src={item.image_url}
+              alt={item.name}
+              fill
+              sizes="64px"
+              className="object-cover"
+            />
+          </div>
+        )}
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-[var(--hai-text-primary)] leading-tight">
+          <h3 className="text-[17px] font-bold text-[var(--hai-text-primary)] leading-tight">
             {item.name}
           </h3>
           {item.description && (
@@ -34,10 +46,10 @@ export default function ItemCard({ item, isOpen, onClick, onQuickAdd }: ItemCard
             </p>
           )}
         </div>
-        
+
         {/* Add Button */}
         <button
-          className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-white text-xl font-bold shadow-md transition-all ${
+          className={`flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-md transition-all ${
             isOpen
               ? "bg-[var(--hai-accent-primary)] hover:bg-[var(--hai-accent-primary-hover)] active:scale-95"
               : "bg-[var(--hai-text-muted)] cursor-not-allowed"
@@ -49,10 +61,10 @@ export default function ItemCard({ item, isOpen, onClick, onQuickAdd }: ItemCard
           +
         </button>
       </div>
-      
+
       {/* Price Row */}
       <div className="flex items-center justify-between mt-3 pt-3 border-t border-[var(--hai-border-subtle)]">
-        <span className="font-bold text-[var(--hai-accent-primary)]">
+        <span className="text-lg font-bold text-[var(--hai-accent-primary)]">
           Rs {item.price.toLocaleString("en-PK")}
         </span>
         {item.options.length > 0 && (
