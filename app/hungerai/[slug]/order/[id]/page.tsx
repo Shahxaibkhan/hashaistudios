@@ -50,6 +50,7 @@ export default async function OrderReceiptPage({ params }: ReceiptPageProps) {
   const orderedAt = new Date(order.created_at).toLocaleString("en-PK", {
     dateStyle: "medium",
     timeStyle: "short",
+    timeZone: "Asia/Karachi",
   });
 
   return (
