@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useCartStore } from "@/store/hungerai/cartStore";
 import { createBrowserSupabaseClient } from "@/lib/hungerai/supabase";
 import { buildWaLink } from "@/lib/hungerai/waLink";
+import { loadCheckoutPrefill, saveCheckoutPrefill } from "@/lib/hungerai/checkoutPrefill";
 import type { Restaurant, OrderItem, OrderPayload } from "@/types/hungerai";
 import CartReview from "@/components/hungerai/checkout/CartReview";
 import CustomerForm from "@/components/hungerai/checkout/CustomerForm";
@@ -32,13 +33,22 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<"cod" | "online" | "card">("cod");
   const [orderType, setOrderType] = useState<"delivery" | "pickup">("delivery");
 
+  // Collapse a section into a compact summary once it's filled in and the
+  // customer has moved on — cuts down how much of the page they have to
+  // scroll through, especially on a repeat visit where it's prefilled.
+  const [detailsExpanded, setDetailsExpanded] = useState(true);
+  const [locationExpanded, setLocationExpanded] = useState(true);
+
+  // Set once the order is placed — swaps the whole page for a brief
+  // confirmation beat before handing off to WhatsApp.
+  const [orderPlaced, setOrderPlaced] = useState<{ waUrl: string } | null>(null);
+
   // Validation errors
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitAttempted, setSubmitAttempted] = useState(false);
 
   // Refs for scroll-to-error
   const nameRef = useRef<HTMLDivElement>(null);
-  const whatsappRef = useRef<HTMLDivElement>(null);
   const addressRef = useRef<HTMLDivElement>(null);
   const locationRef = useRef<HTMLDivElement>(null);
 
@@ -66,9 +76,27 @@ export default function CheckoutPage() {
       setDeliveryLat(data.city_lat);
       setDeliveryLng(data.city_lng);
       // Default order type: pickup-only restaurants start on pickup
-      if (!data.delivery_enabled && data.pickup_enabled) {
+      const pickupOnly = !data.delivery_enabled && data.pickup_enabled;
+      if (pickupOnly) {
         setOrderType("pickup");
       }
+
+      // Prefill from a previous order on this device, and collapse any
+      // section that's already complete so a repeat order is one tap away.
+      const prefill = loadCheckoutPrefill();
+      if (prefill) {
+        if (prefill.name) setCustomerName(prefill.name);
+        if (prefill.whatsapp) setCustomerWhatsApp(prefill.whatsapp);
+        if (prefill.name && prefill.whatsapp) setDetailsExpanded(false);
+
+        if (!pickupOnly && prefill.address && prefill.lat != null && prefill.lng != null) {
+          setDeliveryAddress(prefill.address);
+          setDeliveryLat(prefill.lat);
+          setDeliveryLng(prefill.lng);
+          setLocationExpanded(false);
+        }
+      }
+
       setLoading(false);
     };
 
@@ -79,12 +107,23 @@ export default function CheckoutPage() {
   const cartItems = cartStore.restaurantSlug === slug ? cartStore.items : [];
   const cartSubtotal = cartStore.restaurantSlug === slug ? cartStore.getSubtotal() : 0;
 
-  // Redirect if cart is empty
+  // Redirect if cart is empty — but not right after a successful order,
+  // since placing one deliberately empties the cart.
   useEffect(() => {
-    if (!loading && slug && cartItems.length === 0) {
+    if (!loading && slug && cartItems.length === 0 && !orderPlaced) {
       router.push(`/hungerai/${slug}`);
     }
-  }, [loading, cartItems.length, slug, router]);
+  }, [loading, cartItems.length, slug, router, orderPlaced]);
+
+  // Give the customer a visible "Order Sent" beat before handing off to
+  // WhatsApp, instead of yanking them out of the browser instantly.
+  useEffect(() => {
+    if (!orderPlaced) return;
+    const timer = setTimeout(() => {
+      window.location.href = orderPlaced.waUrl;
+    }, 900);
+    return () => clearTimeout(timer);
+  }, [orderPlaced]);
 
   // Re-validate live after first submit attempt — clears errors as user fixes fields
   useEffect(() => {
@@ -103,6 +142,23 @@ export default function CheckoutPage() {
     setErrors(newErrors);
   }, [submitAttempted, customerName, customerWhatsApp, deliveryAddress, deliveryLat, deliveryLng, orderType]);
 
+  if (orderPlaced) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center px-6 text-center">
+        <div className="hai-checkmark mb-8">
+          <svg width="120" height="120" viewBox="0 0 120 120">
+            <circle className="hai-checkmark-circle" cx="60" cy="60" r="56" />
+            <path className="hai-checkmark-check" d="M38 62 L52 76 L82 46" fill="none" />
+          </svg>
+        </div>
+        <h1 className="font-display text-2xl font-bold text-[var(--hai-text-primary)] mb-2">
+          Order Sent! 🎉
+        </h1>
+        <p className="text-[var(--hai-text-secondary)]">Taking you to WhatsApp to confirm…</p>
+      </div>
+    );
+  }
+
   if (loading || !restaurant || !slug || cartItems.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -114,6 +170,13 @@ export default function CheckoutPage() {
   // Calculate delivery info
   const deliveryFee = 0; // Owner will confirm delivery fee via WhatsApp
   const subtotal = cartSubtotal;
+
+  const isDetailsComplete = customerName.trim() !== "" && customerWhatsApp.trim() !== "";
+  const isLocationComplete = deliveryAddress.trim() !== "" && deliveryLat !== null && deliveryLng !== null;
+  // Errors always force the form back open so they're visible, even if the
+  // section had been collapsed as "done" from a prior fill.
+  const showDetailsForm = detailsExpanded || !!errors.name || !!errors.whatsapp;
+  const showLocationForm = locationExpanded || !!errors.address || !!errors.location;
 
   // Tax calculation
   const taxRate = restaurant.tax_enabled
@@ -143,7 +206,7 @@ export default function CheckoutPage() {
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       const firstRef = newErrors.name ? nameRef
-        : newErrors.whatsapp ? whatsappRef
+        : newErrors.whatsapp ? nameRef // WhatsApp lives in the same "Your Details" section
         : newErrors.address ? addressRef
         : locationRef;
       firstRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -228,16 +291,18 @@ export default function CheckoutPage() {
         receiptUrl,
       });
 
-      // Clear cart
+      // Remember these details on this device for next time.
+      saveCheckoutPrefill({
+        name: customerName,
+        whatsapp: customerWhatsApp,
+        address: orderType === "delivery" ? deliveryAddress : "",
+        lat: orderType === "delivery" ? deliveryLat : null,
+        lng: orderType === "delivery" ? deliveryLng : null,
+      });
+
+      // Clear cart and show a brief confirmation beat before handing off.
       cartStore.clearCart();
-
-      // Redirect to WhatsApp
-      window.location.href = waUrl;
-
-      // After delay, redirect to confirmation
-      setTimeout(() => {
-        router.push(`/hungerai/${slug}/confirmation?order=${order_number}`);
-      }, 1500);
+      setOrderPlaced({ waUrl });
     } catch (err) {
       console.error("Order error:", err);
       setError(err instanceof Error ? err.message : "Failed to place order. Please try again.");
@@ -287,10 +352,17 @@ export default function CheckoutPage() {
         </section>
 
         {/* Customer Details */}
-        <section ref={nameRef}>
+        <section
+          ref={nameRef}
+          onBlur={(e) => {
+            if (isDetailsComplete && !e.currentTarget.contains(e.relatedTarget as Node)) {
+              setDetailsExpanded(false);
+            }
+          }}
+        >
           <h2 className="font-display text-lg font-bold mb-3 flex items-center gap-2">
             Your Details
-            {customerName.trim() && customerWhatsApp.trim() ? (
+            {isDetailsComplete ? (
               <span className="text-xs font-normal px-2 py-0.5 rounded-full bg-[var(--hai-accent-green-light)] text-[var(--hai-accent-green)]">✓ Done</span>
             ) : submitAttempted ? (
               <span className="text-xs font-normal px-2 py-0.5 rounded-full bg-[var(--hai-accent-red-light)] text-[var(--hai-accent-red)]">Required</span>
@@ -298,21 +370,43 @@ export default function CheckoutPage() {
               <span className="text-xs font-normal text-[var(--hai-text-muted)]">Fill in below</span>
             )}
           </h2>
-          <CustomerForm
-            name={customerName}
-            whatsapp={customerWhatsApp}
-            onNameChange={setCustomerName}
-            onWhatsAppChange={setCustomerWhatsApp}
-            errors={errors}
-          />
+          {showDetailsForm ? (
+            <CustomerForm
+              name={customerName}
+              whatsapp={customerWhatsApp}
+              onNameChange={setCustomerName}
+              onWhatsAppChange={setCustomerWhatsApp}
+              errors={errors}
+            />
+          ) : (
+            <div className="hai-card p-4 flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="font-medium text-[var(--hai-text-primary)] truncate">{customerName}</p>
+                <p className="text-sm text-[var(--hai-text-muted)]">+92 {customerWhatsApp}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDetailsExpanded(true)}
+                className="text-sm font-medium text-[var(--hai-accent-primary)] shrink-0"
+              >
+                Edit
+              </button>
+            </div>
+          )}
         </section>
 
         {/* Delivery Location — only for delivery orders */}
         {orderType === "delivery" && (
-        <section>
+        <section
+          onBlur={(e) => {
+            if (isLocationComplete && !e.currentTarget.contains(e.relatedTarget as Node)) {
+              setLocationExpanded(false);
+            }
+          }}
+        >
           <h2 className="font-display text-lg font-bold mb-3 flex items-center gap-2">
             Delivery Location
-            {deliveryAddress.trim() && deliveryLat && deliveryLng ? (
+            {isLocationComplete ? (
               <span className="text-xs font-normal px-2 py-0.5 rounded-full bg-[var(--hai-accent-green-light)] text-[var(--hai-accent-green)]">✓ Done</span>
             ) : submitAttempted ? (
               <span className="text-xs font-normal px-2 py-0.5 rounded-full bg-[var(--hai-accent-red-light)] text-[var(--hai-accent-red)]">Required</span>
@@ -320,46 +414,64 @@ export default function CheckoutPage() {
               <span className="text-xs font-normal text-[var(--hai-text-muted)]">Fill in below</span>
             )}
           </h2>
-          
-          {/* Address Input */}
-          <div className="hai-card p-4 mb-4" ref={addressRef}>
-            <label className="block text-sm font-medium text-[var(--hai-text-primary)] mb-2">
-              Delivery Address
-            </label>
-            <textarea
-              value={deliveryAddress}
-              onChange={(e) => setDeliveryAddress(e.target.value)}
-              placeholder="House #, Street, Area, City (e.g., House 123, Street 5, Gulberg III, Lahore)"
-              rows={3}
-              className={`w-full px-4 py-3 rounded-xl border bg-[var(--hai-bg-primary)] text-[var(--hai-text-primary)] placeholder:text-[var(--hai-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--hai-accent-primary)] focus:border-transparent resize-none text-base transition-colors ${
-                errors.address
-                  ? "border-[var(--hai-accent-red)]"
-                  : "border-[var(--hai-border-subtle)]"
-              }`}
-            />
-            {errors.address && (
-              <p className="text-[var(--hai-accent-red)] text-sm mt-2">{errors.address}</p>
-            )}
-          </div>
 
-          {/* Map */}
-          <div ref={locationRef}>
-            <DeliveryMap
-              centerLat={restaurant.city_lat}
-              centerLng={restaurant.city_lng}
-              pinLat={deliveryLat}
-              pinLng={deliveryLng}
-              onPinChange={(lat, lng) => {
-                setDeliveryLat(lat);
-                setDeliveryLng(lng);
-              }}
-            />
-          </div>
-          <p className="text-sm text-[var(--hai-text-muted)] mt-2 text-center">
-            Delivery fee will be confirmed by the restaurant
-          </p>
-          {errors.location && (
-            <p className="text-[var(--hai-accent-red)] text-sm mt-2">{errors.location}</p>
+          {showLocationForm ? (
+            <>
+              {/* Address Input */}
+              <div className="hai-card p-4 mb-4" ref={addressRef}>
+                <label className="block text-sm font-medium text-[var(--hai-text-primary)] mb-2">
+                  Delivery Address
+                </label>
+                <textarea
+                  value={deliveryAddress}
+                  onChange={(e) => setDeliveryAddress(e.target.value)}
+                  placeholder="House #, Street, Area, City (e.g., House 123, Street 5, Gulberg III, Lahore)"
+                  rows={3}
+                  className={`w-full px-4 py-3 rounded-xl border bg-[var(--hai-bg-primary)] text-[var(--hai-text-primary)] placeholder:text-[var(--hai-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--hai-accent-primary)] focus:border-transparent resize-none text-base transition-colors ${
+                    errors.address
+                      ? "border-[var(--hai-accent-red)]"
+                      : "border-[var(--hai-border-subtle)]"
+                  }`}
+                />
+                {errors.address && (
+                  <p className="text-[var(--hai-accent-red)] text-sm mt-2">{errors.address}</p>
+                )}
+              </div>
+
+              {/* Map */}
+              <div ref={locationRef}>
+                <DeliveryMap
+                  centerLat={restaurant.city_lat}
+                  centerLng={restaurant.city_lng}
+                  pinLat={deliveryLat}
+                  pinLng={deliveryLng}
+                  onPinChange={(lat, lng) => {
+                    setDeliveryLat(lat);
+                    setDeliveryLng(lng);
+                  }}
+                />
+              </div>
+              <p className="text-sm text-[var(--hai-text-muted)] mt-2 text-center">
+                Delivery fee will be confirmed by the restaurant
+              </p>
+              {errors.location && (
+                <p className="text-[var(--hai-accent-red)] text-sm mt-2">{errors.location}</p>
+              )}
+            </>
+          ) : (
+            <div className="hai-card p-4 flex items-center justify-between gap-3">
+              <div className="min-w-0 flex items-start gap-2">
+                <span className="text-lg shrink-0">📍</span>
+                <p className="text-sm text-[var(--hai-text-primary)] line-clamp-2">{deliveryAddress}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setLocationExpanded(true)}
+                className="text-sm font-medium text-[var(--hai-accent-primary)] shrink-0"
+              >
+                Edit
+              </button>
+            </div>
           )}
         </section>
         )}
